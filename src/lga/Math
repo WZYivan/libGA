@@ -1,0 +1,52 @@
+#ifndef M_libga_math
+#define M_libga_math
+
+#include <cmath>
+#include <vector>
+
+#include <lga/Base>
+
+M_libga_begin
+
+    bool
+    eqApprox(double p_x, double p_y, double p_threshold = 1e-5);
+
+struct Unary_Function
+{
+    virtual double operator()(double) const { return 0.0; }
+};
+
+struct Sin_Function : public Unary_Function
+{
+    double a{0.0}, b{0.0}, c{0.0};
+
+    double operator()(double) const override;
+};
+
+struct Double_Gaussian_Function : public Unary_Function
+{
+    double
+        offset{0.0},
+        amp1{0.0},
+        center1{0.0},
+        sigma1{0.0},
+        amp2{0.0},
+        center2{0.0},
+        sigma2{0.0};
+    double operator()(double) const override;
+};
+
+struct Cubic_Spline_Function : public Unary_Function
+{
+    std::vector<double> x, y, a, b, c, d;
+    double threshold;
+    double operator()(double) const override;
+};
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/Math.cpp>
+#endif
+
+#endif
