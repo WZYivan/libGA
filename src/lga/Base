@@ -54,6 +54,4 @@
 #define M_libga_hp false
 #endif
 
-#include <lga/impl/Config.hpp>
-
 #endif
