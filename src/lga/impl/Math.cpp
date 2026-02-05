@@ -8,6 +8,52 @@ M_libga_begin
     return std::abs(p_x - p_y) < p_threshold;
 }
 
+double zeroOr(double p_x, double p_threshold)
+{
+    return eqApprox(p_x, 0.0, p_threshold) ? 0.0 : p_x;
+}
+
+double round465(double p_val)
+{
+    double int_part;
+    double frac_part = std::modf(p_val, &int_part);
+
+    if (eqApprox(frac_part, 0.5))
+    {
+        if (eqApprox(std::fmod(int_part, 2), 0))
+        {
+            return int_part;
+        }
+        else
+        {
+            return int_part + (p_val >= 0 ? 1 : -1);
+        }
+    }
+    else if (std::abs(frac_part) < 0.5)
+    {
+        return int_part;
+    }
+    else // (std::abs(frac_part) > 0.5)
+    {
+        return int_part + (p_val >= 0 ? 1 : -1);
+    }
+}
+
+double cut(double p_val, int p_precesion)
+{
+    if (p_precesion < 0)
+    {
+        return p_val;
+    }
+
+    if (p_precesion == 0)
+    {
+        return round465(p_val);
+    }
+    double scale = std::pow(10, p_precesion);
+    return round465(p_val * scale) / scale;
+}
+
 double Sin_Function::operator()(double p_x) const
 {
     return a * std::sin(2 * std::numbers::pi / b * p_x + c);

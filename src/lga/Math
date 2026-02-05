@@ -11,6 +11,12 @@ M_libga_begin
     bool
     eqApprox(double p_x, double p_y, double p_threshold = 1e-5);
 
+double zeroOr(double p_x, double p_threshold = 1e-5);
+
+double round465(double);
+
+double cut(double, int p_precesion);
+
 struct Unary_Function
 {
     virtual double operator()(double) const { return 0.0; }
