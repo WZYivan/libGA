@@ -8,6 +8,7 @@
 #include <format>
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
 
 #include <lga/Base>
 
@@ -22,10 +23,20 @@ M_libga_begin
         u_ddmmss{"{:0s}{:03d}.{:02d}{:02.0f}"};
 };
 
+namespace config
+{
+    struct Angle
+    {
+        std::string_view output_fmt = fmt::dms;
+    };
+    static inline Angle angle = {};
+}
+
 class Angle
 {
 public:
     explicit constexpr Angle(const double p_rad) : m_radian(p_rad) {}
+    Angle() : Angle(0.0) {}
     constexpr Angle(std::initializer_list<double> il);
 
     constexpr static Angle fromSeconds(double p_seconds);
@@ -125,6 +136,12 @@ constexpr double dms2rad(double p_d, double p_m, double p_s)
 {
     std::array<double, 3> dms{p_d, p_m, p_s};
     return dms2rad(dms.begin(), dms.end());
+}
+
+inline std::ostream &operator<<(std::ostream &os, const Angle &angle)
+{
+    os << angle.toString(config::angle.output_fmt);
+    return os;
 }
 
 M_libga_end
