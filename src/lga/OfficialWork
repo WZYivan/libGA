@@ -1,0 +1,77 @@
+#ifndef M_libga_offical_work
+#define M_libga_offical_work
+
+#include <vector>
+#include <string>
+
+#include <DataFrame/DataFrame.h>
+
+#include <lga/Base>
+#include <lga/Math>
+
+M_libga_begin
+
+    using DataFrame = hmdf::StdDataFrame<size_t>;
+using DataFrameColumnIndices = std::vector<size_t>;
+using StrDataFrame = hmdf::StdDataFrame<std::string>;
+using StrDataFrameColumnIndices = std::vector<std::string>;
+
+namespace param
+{
+    struct Official_Work
+    {
+        struct
+        {
+            struct
+            {
+                std::function<double(double)>
+                    forty_sqrt_l = [](double p_l) -> double
+                {
+                    return 40 * std::sqrt(p_l);
+                };
+            } elev;
+        } tolerence;
+    };
+#if !(M_libga_with_impl)
+    extern const Official_Work official_work;
+#endif
+}
+
+namespace internal
+{
+    void adjustSumToTarget(
+        std::vector<double> &p_vec,
+        double p_sum,
+        double p_target,
+        int p_precesion);
+
+    double calcTolerence(
+        const std::vector<double> &p_vec,
+        std::function<double(double)> p_fn);
+}
+
+DataFrame
+closedElevAdjust(
+    std::vector<double> &p_distances,
+    std::vector<double> &p_diff,
+    double p_beg,
+    int p_correction_precision = 0,
+    std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
+
+DataFrame
+attachedElevAdjust(
+    std::vector<double> &p_distances,
+    std::vector<double> &p_diff,
+    double p_beg,
+    double p_end,
+    int p_correction_precision = 0,
+    std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/OfficialWorkUtils.cpp>
+#include <lga/impl/OfficialWorkElevAdjust.cpp>
+#endif
+
+#endif
