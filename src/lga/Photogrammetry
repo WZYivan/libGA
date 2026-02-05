@@ -1,0 +1,131 @@
+#ifndef M_libga_photogrammetry
+#define M_libga_photogrammetry
+
+#include <span>
+#include <utility>
+
+#include <lga/Linalg>
+#include <lga/impl/Constans.hpp>
+
+M_libga_begin
+
+    struct Interior
+{
+    double x, y, f, m;
+};
+
+struct Exterior
+{
+    double x, y, z, phi, omega, kappa;
+
+    static Exterior makeFrom(const Interior &p_in, const Matrix &p_obj);
+};
+
+Matrix ex2yxzRotation(const Exterior &);
+
+Matrix xy2mat21(double, double);
+Matrix xyz2mat31(double, double, double);
+Matrix xy2mat12(double, double);
+Matrix xyz2mat13(double, double, double);
+
+Matrix obj2aux(const Matrix &p_obj, const Exterior &p_ex);
+Matrix aux2isp(const Matrix &p_aux, const Matrix &p_rotate);
+Matrix aux2isp(const Matrix &p_aux, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
+Matrix isp2img(const Matrix &p_isp, const Interior &p_in);
+
+Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, const Matrix &p_rotate);
+Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
+
+Matrix isp2aux(const Matrix &p_isp, const Matrix &p_rotate);
+Matrix isp2aux(const Matrix &p_isp, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
+
+Matrix aux2obj(const Matrix &p_aux, const Exterior &p_ex);
+
+struct Collinearity_Condition_Equation_Coefficient
+{
+    double a11, a12, a13, a14, a15, a16,
+        a21, a22, a23, a24, a25, a26;
+
+    Matrix toMatrix26() const noexcept;
+    Matrix toMatrix29() const noexcept;
+};
+
+struct Collinearity_Condition_Equation_Linearization_Param
+{
+    double x, y, f, h, kappa, omega, z;
+    const Matrix &rotate;
+};
+
+Collinearity_Condition_Equation_Coefficient
+cceSimplifyAll(
+    Collinearity_Condition_Equation_Linearization_Param p);
+Collinearity_Condition_Equation_Coefficient
+cceKappaOnly(
+    Collinearity_Condition_Equation_Linearization_Param p);
+Collinearity_Condition_Equation_Coefficient
+cceSimplifyNone(
+    Collinearity_Condition_Equation_Linearization_Param p);
+
+using Collinearity_Condition_Equation_Coefficient_Solver =
+    std::function<Collinearity_Condition_Equation_Coefficient(Collinearity_Condition_Equation_Linearization_Param)>;
+
+struct Space_Resection_Result
+{
+    Exterior exterior;
+    Matrix rotate, sigma, image;
+    double rmse;
+    Iterative_Algo_Info info;
+};
+
+Space_Resection_Result
+spaceResection(
+    const Interior &p_in,
+    const Matrix &p_img,
+    const Matrix &p_obj,
+    size_t p_max_loop = 50,
+    double p_threshold = 1e-5,
+    Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
+    Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+
+struct Image_Meta_Data
+{
+    Exterior exterior;
+    Interior interior;
+};
+
+Matrix
+spaceIntersection(
+    const Image_Meta_Data &p_left_meta,
+    const Matrix &p_left_img,
+    const Image_Meta_Data &p_right_meta,
+    const Matrix &p_right_img);
+
+struct Space_Intersection_Ols_Result
+{
+    Matrix coordinate;
+    Matrix sigma;
+    double rmse;
+    Iterative_Algo_Info info;
+};
+
+struct Space_Intersection_Ols_Block
+{
+    Image_Meta_Data meta;
+    Matrix image;
+};
+
+Space_Intersection_Ols_Result
+spaceIntersection(
+    std::span<const Space_Intersection_Ols_Block> p_list,
+    size_t p_max_loop = 50,
+    double p_threshold = 1e-5,
+    Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
+    Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/Photogrammetry.cpp>
+#endif
+
+#endif
