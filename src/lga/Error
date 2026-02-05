@@ -1,0 +1,52 @@
+#ifndef M_libga_error
+#define M_libga_error
+
+#include <stdexcept>
+#include <format>
+
+#include <lga/Base>
+
+M_libga_begin
+
+#define M_libga_declare_error_with_msg_only(P_error, P_base) \
+    class P_error : public P_base                            \
+    {                                                        \
+    public:                                                  \
+        P_error() noexcept = default;                        \
+        explicit P_error(const std::string &p_msg) noexcept; \
+        explicit P_error(const char *p_msg) noexcept;        \
+        const char *what() const noexcept override;          \
+                                                             \
+    private:                                                 \
+        std::string m_msg;                                   \
+    }
+
+#define M_libga_impl_error_with_msg_only(P_error, P_default_msg)                           \
+    P_error::P_error(const std::string &p_msg) noexcept : m_msg(p_msg) {}                  \
+    P_error::P_error(const char *p_msg) noexcept : m_msg(p_msg ? p_msg : P_default_msg) {} \
+    const char *P_error::what() const noexcept { return m_msg.empty() ? P_default_msg : m_msg.c_str(); }
+
+    M_libga_declare_error_with_msg_only(Not_Implement_Error, std::exception);
+
+class Matrix_Shape_Error : public std::exception
+{
+public:
+    Matrix_Shape_Error() noexcept;
+    Matrix_Shape_Error(const std::string &p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
+    Matrix_Shape_Error(const char *p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
+    const char *what() const noexcept override;
+
+private:
+    std::string m_prefix;
+    int m_row, m_col;
+    int m_row_e, m_col_e;
+    mutable std::string m_msg;
+};
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/Error.cpp>
+#endif
+
+#endif
