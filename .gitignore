@@ -1,0 +1,7 @@
+.vscode/*
+include/*
+lib/*
+*.o
+test/build/*
+bin/*
+src/lga/unsupported/*
