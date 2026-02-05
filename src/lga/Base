@@ -38,8 +38,12 @@
 #define M_libga_debug true
 #include <print>
 #include <iostream>
+#if (__x86_64__)
+#define M_libga_b(P_reason) asm("int3");
+#endif
 #else
 #define M_libga_debug false
+#define M_libga_b(P_reason)
 #endif
 
 #ifdef LGA_ENABLE_UNSUPPOTRED
