@@ -28,7 +28,8 @@ CXX_FLAGS := -std=gnu++23 \
 	-I$(INCLUDE_DIR) \
 	-I./src \
 	-L$(LIB_DIR) \
-	-L$(BIN_DIR)
+	-L$(BIN_DIR) \
+	-Wno-interference-size
 
 BUILD_TYPE ?= Release
 
@@ -85,6 +86,10 @@ DEF_CATCH2 := -DCATCH_CONFIG_MAIN
 LINK_LGA := -Bdynamic -l:libga.so -Wl,-rpath=$(BIN_DIR)
 DEF_LGA ?= #-DLGA_HEADER_ONLY
 
+LINK_DEPS := -lDataFrame -ltbb
+
+LINK_FOR_TEST := $(LINK_CATCH2) $(LINK_LGA) $(LINK_DEPS)
+
 TEST_BUILD_DIR := $(TEST_DIR)/build
 TEST_OBJ_DIR := $(TEST_BUILD_DIR)/obj
 TEST_CPP := $(wildcard $(TEST_DIR)/*.cpp)
@@ -100,7 +105,7 @@ $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
 
 $(TEST_BUILD_DIR)/%: $(TEST_OBJ_DIR)/%.o
 	@mkdir -p $(dir $@)
-	$(COMPILE) $< -o $@ $(LINK_CATCH2) $(LINK_LGA)
+	$(COMPILE) $< -o $@ $(LINK_FOR_TEST)
 
 $(TEST_OBJ_DIR): $(TEST_BUILD_DIR)
 	@mkdir -p $@
