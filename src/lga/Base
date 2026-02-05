@@ -1,0 +1,59 @@
+/**
+ * #define M_internal_macro_name(P_param_name)
+ * #define PUBLIC_MACRO_NAME(P_param_name)
+ * int M_variable_generated_by_macro;
+ * class Class_Name;
+ * int m_private_member_value_name;
+ * void m_privateFunctionName();
+ * void functionName(int p_param_name);
+ * void __privateFunctionName();
+ * template < typename TypeName >;
+ * int value_name;
+ * int __private_var;
+ * namespace namespace_name;
+ */
+
+#ifndef M_libga_base
+#define M_libga_base
+
+#define M_libga_version_major 0
+#define M_libga_version_minor 0
+#define M_libga_version_patch 1
+
+#define M_libga_begin \
+    namespace lga     \
+    {
+#define M_libga_end }
+
+#ifdef LGA_HEADER_ONLY
+#define M_libga_with_impl (true)
+#else
+#define M_libga_with_impl (false)
+#endif
+
+#include <lga/Error>
+#define M_libga_not_impl(P_reason) throw lga::Not_Implement_Error(P_reason)
+
+#ifdef LGA_DEBUG
+#define M_libga_debug true
+#include <print>
+#include <iostream>
+#else
+#define M_libga_debug false
+#endif
+
+#ifdef LGA_ENABLE_UNSUPPOTRED
+#define M_libga_unsupported true
+#else
+#define M_libga_unsupported false
+#endif
+
+#ifdef LGA_HIGH_PRECISION
+#define M_libga_hp true
+#else
+#define M_libga_hp false
+#endif
+
+#include <lga/impl/Config.hpp>
+
+#endif
