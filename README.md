@@ -131,6 +131,8 @@ The library includes predefined reference ellipsoids:
 ## Dependencies
 
 - eigen 5.0.0
+- DataFrame 3.7.0
+    - oneTBB/tbb 2022.3.0
 - catch2 (optional for test)
 
 ## Install
