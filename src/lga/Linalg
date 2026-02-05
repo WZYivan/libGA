@@ -1,0 +1,65 @@
+#ifndef M_libga_linalg
+#define M_libga_linalg
+
+#include <cmath>
+
+#include <Eigen/Dense>
+
+#include <lga/Base>
+
+M_libga_begin
+
+    using Matrix = Eigen::MatrixXd;
+using Vector = Eigen::VectorXd;
+
+#define M_libga_placeholder_matrix Matrix::Zero(1, 1)
+#define LGA_PLACEHOLDER_MATRIX M_libga_placeholder_matrix
+
+void fillNan(Matrix &p_mat, double p_val);
+bool isPlaceHolder(const Matrix &);
+bool isValidCoordinate(const Matrix &p_coord);
+bool isValidRotationMatrix(const Matrix &p_coord);
+[[noreturn]] void matrixBadShape(int, int, int, int);
+
+Matrix normalizedEquation(const Matrix &p_A, const Matrix &p_P = M_libga_placeholder_matrix);
+Matrix identityLike(const Matrix &);
+
+Matrix choleskyInverse(const Matrix &);
+Matrix svdInverse(const Matrix &);
+using Matrix_Inverse_Solver = std::function<Matrix(const Matrix &)>;
+
+Matrix ols(const Matrix &p_A, const Matrix &p_L, const Matrix &p_P = M_libga_placeholder_matrix, std::function<Matrix(const Matrix &)> p_inv_func = choleskyInverse);
+
+Matrix xRotation(double p_omega);
+Matrix yRotation(double p_phi);
+Matrix zRotation(double p_kappa);
+Matrix rotationMatrix(double p_x = 0, double p_y = 0, double p_z = 0);
+
+Matrix translate(const Matrix &p_coord, double p_x = 0, double p_y = 0, double p_z = 0);
+Matrix rotateForward(const Matrix &p_coord, const Matrix &p_rotate);
+Matrix rotateInverse(const Matrix &p_coord, const Matrix &p_rotate);
+Matrix scale(const Matrix &p_coord, double p_s);
+
+double rmse(
+    const Matrix &p_v,
+    int n,
+    int t,
+    const Matrix &p_P = M_libga_placeholder_matrix);
+Matrix errorMatrix(double p_rmse, const Matrix &p_n);
+
+#if !(M_libga_with_impl)
+namespace fmt
+{
+    extern const Eigen::IOFormat
+        python,
+        csv;
+}
+#endif
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/Linalg.cpp>
+#endif
+
+#endif
