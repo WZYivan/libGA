@@ -17,8 +17,8 @@
 #define M_libga_base
 
 #define M_libga_version_major 0
-#define M_libga_version_minor 0
-#define M_libga_version_patch 1
+#define M_libga_version_minor 1
+#define M_libga_version_patch 0
 
 #define M_libga_begin \
     namespace lga     \
