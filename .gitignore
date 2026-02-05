@@ -7,3 +7,5 @@ bin/*
 src/lga/unsupported/*
 
 *.toml
+
+log.csv
