@@ -33,11 +33,11 @@ CXX_FLAGS := -std=gnu++23 \
 
 BUILD_TYPE ?= Release
 
-ifeq ($(BUILD_TYPE), Debug)  
-	CXX_FLAGS += -DLGA_DEBUG
-endif
-
 COMPILE := $(CXX) $(CXX_FLAGS)
+COMPILE_TEST := $(COMPILE) -g -DLGA_DEBUG
+ifeq ($(BUILD_TYPE), Debug)
+	COMPILE += -g -DLGA_DEBUG
+endif
 MK_STATIC := ar rcs
 MK_DYNAMIC := $(CXX) -fPIC -shared
 
@@ -76,7 +76,7 @@ $(DLIB_NAME): $(OBJ_FILES)
 clean-lib: 
 	-$(RM) $(BIN_DIR)/$(LIB_NAME)
 	-$(RM) $(BIN_DIR)/$(DLIB_NAME)
-	-$(RM) $(OBJ_DIR)
+	-$(RM) -r $(OBJ_DIR)
 
 # build test
 
@@ -101,11 +101,11 @@ test: $(TEST_OBJ_DIR) $(TEST_OBJ) $(TEST_EXE)
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(COMPILE) -c $< -o $@ $(DEF_CATCH2) $(DEF_LGA)
+	$(COMPILE_TEST) -c $< -o $@ $(DEF_CATCH2) $(DEF_LGA)
 
 $(TEST_BUILD_DIR)/%: $(TEST_OBJ_DIR)/%.o
 	@mkdir -p $(dir $@)
-	$(COMPILE) $< -o $@ $(LINK_FOR_TEST)
+	$(COMPILE_TEST) $< -o $@ $(LINK_FOR_TEST)
 
 $(TEST_OBJ_DIR): $(TEST_BUILD_DIR)
 	@mkdir -p $@
