@@ -282,25 +282,29 @@ struct Gauss_Projector
     Angle
     meridianConvergence(
         const Geodetic_Coordinate &,
-        const Ellipsoid &) const noexcept;
+        double,
+        const Ellipsoid &) const;
     Angle
     meridianConvergence(
         const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const noexcept;
+        double,
+        const Ellipsoid &) const;
     Gauss_Project_Direction_Correction
     directionCorrection(
         const Gauss_Project_Coordinate &,
         const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const noexcept;
+        const Ellipsoid &) const;
     double
     distanceCorrection(
         double p_s,
         const Geodetic_Coordinate &,
         const Geodetic_Coordinate &,
-        const Ellipsoid &) const noexcept;
+        double p_interval,
+        const Ellipsoid &) const;
     double
     stretch(
         const Geodetic_Coordinate &,
+        double,
         const Ellipsoid &) const noexcept;
     double
     stretch(

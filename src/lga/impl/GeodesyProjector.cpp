@@ -229,6 +229,191 @@ Gauss_Projector::
         p_ellipsoid);
 }
 
+Angle Gauss_Projector::
+    meridianConvergence(
+        const Geodetic_Coordinate &p_gc,
+        double p_interval,
+        const Ellipsoid &p_ellipsoid) const
+{
+    Latitude B = p_gc.lat;
+    Longitude L = p_gc.lon;
+
+    Longitude Lc = centerMeridian(L, p_interval);
+    double
+        l = L.rad() - Lc.rad(),
+        l3 = std::pow(l, 3),
+        l5 = std::pow(l, 5),
+        sinB = B.sin(),
+        cosB = B.cos(),
+        cosBp2 = std::pow(cosB, 2),
+        cosBp4 = std::pow(cosB, 4);
+    Ellipsoid_Geometry_Latitude_Aux lc(B, p_ellipsoid);
+    double
+        n2 = lc.nu_2,
+        n4 = std::pow(n2, 2),
+        t = lc.t,
+        t2 = std::pow(t, 2);
+    double gamma =
+        sinB * l +
+        1.0 / 3.0 * sinB * cosBp2 * l3 * (1 + 3 * n2 + 2 * n4) +
+        1.0 / 15.0 * sinB * cosBp4 * l5 * (2 - t2);
+    return Angle(gamma);
+}
+
+Angle Gauss_Projector::
+    meridianConvergence(
+        const Gauss_Project_Coordinate &p_gpc,
+        double p_interval,
+        const Ellipsoid &p_ellipsoid) const
+{
+    double x = p_gpc.x, y = p_gpc.y;
+    Latitude Bf = meridianArcBottom(x, p_ellipsoid);
+    Ellipsoid_Geometry_Latitude_Aux lc(Bf, p_ellipsoid);
+    double
+        t = lc.t,
+        t2 = std::pow(t, 2),
+        t4 = std::pow(t, 4),
+        n2 = lc.nu_2;
+    Ellipsoid_Principle_Curvature_Radius crc = principleCurvatureRadius(Bf, p_ellipsoid);
+    double
+        N = crc.n,
+        N3 = std::pow(N, 3),
+        N5 = std::pow(N, 5),
+        y3 = std::pow(y, 3),
+        y5 = std::pow(y, 5);
+    double gamma =
+        y * t / N -
+        y3 / (3 * N3) * t * (1 + t2 - n2) +
+        y5 / (15 * N5) * t * (2 + 5 * t2 + 3 * t4);
+    return Angle(gamma);
+}
+
+Gauss_Project_Direction_Correction
+Gauss_Projector::
+    directionCorrection(
+        const Gauss_Project_Coordinate &p_gpc1,
+        const Gauss_Project_Coordinate &p_gpc2,
+        const Ellipsoid &p_ellipsoid) const
+{
+    Geodetic_Coordinate
+        gc1 = this->inverse(p_gpc1, p_ellipsoid),
+        gc2 = this->inverse(p_gpc2, p_ellipsoid);
+    double
+        x1 = p_gpc1.x,
+        y1 = p_gpc1.y,
+        x2 = p_gpc2.x,
+        y2 = p_gpc2.y,
+        ym = (y1 + y2) / 2.0,
+        ym2 = std::pow(ym, 2),
+        ym3 = std::pow(ym, 3);
+
+    Latitude
+        B1 = gc1.lat,
+        B2 = gc2.lat,
+        Bm((B1.rad() + B2.rad()) / 2.0);
+    Ellipsoid_Principle_Curvature_Radius crc =
+        principleCurvatureRadius(Bm, p_ellipsoid);
+    double
+        Rm = meanCurvatureRadius(crc),
+        Rm2 = std::pow(Rm, 2),
+        Rm3 = std::pow(Rm, 3);
+    Ellipsoid_Geometry_Latitude_Aux lc(Bm, p_ellipsoid);
+    double n2 = lc.nu_2, t = lc.t;
+
+    double
+        delta_forward =
+            -(x2 - x1) / (6 * Rm2) * (2 * y1 + y2 - ym3 / Rm2) -
+            n2 * t / Rm3 * (y2 - y1) * ym2,
+        delta_backward =
+            (x2 - x1) / (6 * Rm2) * (2 * y2 + y1 - ym3 / Rm2) +
+            n2 * t / Rm3 + (y2 - y1) * ym2;
+    return Gauss_Project_Direction_Correction{
+        .forward = Angle(delta_forward),
+        .backward = Angle(delta_backward)};
+}
+
+double
+Gauss_Projector::
+    distanceCorrection(
+        double p_s,
+        const Geodetic_Coordinate &p_beg,
+        const Geodetic_Coordinate &p_end,
+        double p_interval,
+        const Ellipsoid &p_ellipsoid) const
+{
+    Gauss_Project_Coordinate
+        proj_beg = this->forward(p_beg, p_interval, p_ellipsoid),
+        proj_end = this->forward(p_end, p_interval, p_ellipsoid);
+    Latitude Bm((p_beg.lat.rad() + p_end.lat.rad()) / 2.0);
+    Ellipsoid_Principle_Curvature_Radius crc =
+        principleCurvatureRadius(Bm, p_ellipsoid);
+    double
+        Rm = meanCurvatureRadius(crc),
+        Rm2 = std::pow(Rm, 2),
+        Rm4 = std::pow(Rm, 4),
+        ym = (proj_beg.y + proj_end.y) / 2.0,
+        ym2 = std::pow(ym, 2),
+        ym4 = std::pow(ym, 4),
+        dy = proj_end.y - proj_beg.y,
+        dy2 = std::pow(dy, 2),
+        scale = 1.0 +
+                ym2 / (2 * Rm2) +
+                ym4 / (24 * Rm4) +
+                dy2 / (24 * Rm2),
+        D = scale * p_s;
+    return D;
+}
+
+double
+Gauss_Projector::
+    stretch(
+        const Geodetic_Coordinate &p_gc,
+        double p_interval,
+        const Ellipsoid &p_ellipsoid) const noexcept
+{
+    Longitude lc = centerMeridian(p_gc.lon, p_interval);
+    Longitude dl(lc.rad() - p_gc.lon.rad());
+    double
+        l = dl.rad(),
+        l2 = std::pow(l, 2),
+        l4 = std::pow(l, 4),
+        cosB = p_gc.lat.cos(),
+        cosBp2 = std::pow(cosB, 2),
+        cosBp4 = std::pow(cosB, 4);
+    Ellipsoid_Geometry_Latitude_Aux
+        lat_const(p_gc.lat, p_ellipsoid);
+    double
+        n2 = lat_const.nu_2,
+        t = lat_const.t,
+        t2 = std::pow(t, 2);
+    double m =
+        1 +
+        1.0 / 2.0 * l2 * cosBp2 * (1 + n2) +
+        1.0 / 24.0 * l4 * cosBp4 * (5 - 4 * t2);
+    return m;
+}
+double
+Gauss_Projector::
+    stretch(
+        const Gauss_Project_Coordinate &p_gpc,
+        const Ellipsoid &p_ellipsoid) const noexcept
+{
+    Geodetic_Coordinate gc = this->inverse(p_gpc, p_ellipsoid);
+    Ellipsoid_Principle_Curvature_Radius crc =
+        principleCurvatureRadius(gc.lat, p_ellipsoid);
+    double
+        R = meanCurvatureRadius(crc),
+        R2 = std::pow(R, 2),
+        R4 = std::pow(R, 4),
+        y = p_gpc.y,
+        y2 = std::pow(y, 2),
+        y4 = std::pow(y, 4),
+        m = 1.0 +
+            y2 / (2 * R2) +
+            y4 / (24 * R4);
+    return m;
+}
+
 const Gauss_Projector gauss_project{};
 
 M_libga_end
