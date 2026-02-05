@@ -1,4 +1,4 @@
-## [unreleased]
+## [0.1.0] - 2026-02-05
 
 ### 🚀 Features
 
@@ -23,7 +23,13 @@
 ### 📚 Documentation
 
 - :page_facing_up: add MIT license
+- Add CHANGELOG
+
+### 🧪 Testing
+
+- :white_check_mark: add test for v0.1.0
 
 ### ⚙️ Miscellaneous Tasks
 
 - :see_no_evil: add .gitignore
+- :see_no_evil: update ignore *.toml
