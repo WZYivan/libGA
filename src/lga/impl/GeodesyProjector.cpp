@@ -4,7 +4,7 @@ M_libga_begin
 
     namespace internal
 {
-    int zone3(Longitude p_lon)
+    int zone3(const Longitude &p_lon)
     {
         double
             rad_d3 = deg2rad(3.0),
@@ -15,7 +15,7 @@ M_libga_begin
                                                 ? 1
                                                 : 0);
     }
-    int zone6(Longitude p_lon)
+    int zone6(const Longitude &p_lon)
     {
         return int(p_lon.rad() / deg2rad(6.0)) + 1;
     }

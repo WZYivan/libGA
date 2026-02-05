@@ -4,10 +4,10 @@ M_libga_begin
 
     Geodetic_Forward_Solve_Result
     Geodetic_Solver::operator()(
-        Latitude p_lat,
-        Longitude p_lon,
+        const Latitude &p_lat,
+        const Longitude &p_lon,
         double p_s,
-        Angle p_forward,
+        const Angle &p_forward,
         const Ellipsoid &p_ellipsoid) const
 {
     return this->forward(
@@ -20,10 +20,10 @@ M_libga_begin
 
 Geodetic_Inverse_Solve_Result
 Geodetic_Solver::operator()(
-    Latitude p_lat_1,
-    Longitude p_lon_1,
-    Latitude p_lat_2,
-    Longitude p_lon_2,
+    const Latitude &p_lat_1,
+    const Longitude &p_lon_1,
+    const Latitude &p_lat_2,
+    const Longitude &p_lon_2,
     const Ellipsoid &p_ellipsoid) const
 {
     return this->inverse(
@@ -195,7 +195,7 @@ namespace internal
 
     Gauss_Lemma_Coeff
     calcGaussLemmaCoeff(
-        Latitude Bm,
+        const Latitude &Bm,
         const Ellipsoid &ellipsoid)
     {
         Gauss_Lemma_Coeff coeff;
@@ -265,10 +265,10 @@ namespace internal
 
     void
     initGaussLemmaForwardSolveIteration(
-        Longitude L,
-        Latitude B,
+        const Longitude &L,
+        const Latitude &B,
         double S,
-        Angle a_backward,
+        const Angle &a_backward,
         double &b,
         double &l,
         double &a,
@@ -287,10 +287,10 @@ namespace internal
 
 Geodetic_Forward_Solve_Result
 basselFormulaForward(
-    Latitude p_B1,
-    Longitude p_L1,
+    const Latitude &p_B1,
+    const Longitude &p_L1,
     double p_S,
-    Angle p_forward,
+    const Angle &p_forward,
     const Ellipsoid &p_ellipsoid)
 {
     Ellipsoid_Geometry_Latitude_Aux lc(p_B1, p_ellipsoid);
@@ -347,6 +347,8 @@ basselFormulaForward(
         tanA2 = std::tan(A2);
     A2 = internal::adjustA2(A2, sinA1, tanA2);
 
+    M_libga_b("bassel_formula.forward before return");
+
     return {
         .lat = Latitude(B2),
         .lon = Longitude(L2),
@@ -355,10 +357,10 @@ basselFormulaForward(
 
 Geodetic_Inverse_Solve_Result
 basselFormulaInverse(
-    Latitude B1,
-    Longitude L1,
-    Latitude B2,
-    Longitude L2,
+    const Latitude &B1,
+    const Longitude &L1,
+    const Latitude &B2,
+    const Longitude &L2,
     const Ellipsoid &ellipsoid)
 {
     Ellipsoid_Geometry_Latitude_Aux
@@ -467,10 +469,10 @@ basselFormulaInverse(
 
 Geodetic_Forward_Solve_Result
 gaussLemmaForward(
-    Latitude B,
-    Longitude L,
+    const Latitude &B,
+    const Longitude &L,
     double S,
-    Angle a_forward,
+    const Angle &a_forward,
     const Ellipsoid &ellipsoid)
 {
     double dB0, dL0, dA0;
@@ -529,10 +531,10 @@ gaussLemmaForward(
 
 Geodetic_Inverse_Solve_Result
 gaussLemmaInverse(
-    Latitude B1,
-    Longitude L1,
-    Latitude B2,
-    Longitude L2,
+    const Latitude &B1,
+    const Longitude &L1,
+    const Latitude &B2,
+    const Longitude &L2,
     const Ellipsoid &ellipsoid)
 {
     double

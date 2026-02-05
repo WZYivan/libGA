@@ -284,7 +284,7 @@ const Ellipsoid
     cgcs2000{internal::calcCGCS2000()};
 
 Ellipsoid_Geometry_Latitude_Aux::Ellipsoid_Geometry_Latitude_Aux(
-    Latitude p_lat,
+    const Latitude &p_lat,
     const Ellipsoid &p_ellipsoid) : b(p_lat)
 {
     const Ellipsoid_Geometry_Property &geometry = p_ellipsoid.geometry;

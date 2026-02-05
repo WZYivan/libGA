@@ -142,7 +142,7 @@ struct Ellipsoid_Geometry_Latitude_Aux
     double t, nu_2, w, v;
 
     Ellipsoid_Geometry_Latitude_Aux(
-        Latitude p_lat,
+        const Latitude &p_lat,
         const Ellipsoid &p_ellipsoid);
 };
 
@@ -180,35 +180,35 @@ struct Geodetic_Solver
 {
     std::function<
         Geodetic_Forward_Solve_Result(
-            Latitude,
-            Longitude,
+            const Latitude &,
+            const Longitude &,
             double,
-            Angle,
+            const Angle &,
             const Ellipsoid &)>
         forward;
     std::function<
         Geodetic_Inverse_Solve_Result(
-            Latitude,
-            Longitude,
-            Latitude,
-            Longitude,
+            const Latitude &,
+            const Longitude &,
+            const Latitude &,
+            const Longitude &,
             const Ellipsoid &)>
         inverse;
 
     Geodetic_Forward_Solve_Result
     operator()(
-        Latitude,
-        Longitude,
+        const Latitude &,
+        const Longitude &,
         double,
-        Angle,
+        const Angle &,
         const Ellipsoid &) const;
 
     Geodetic_Inverse_Solve_Result
     operator()(
-        Latitude,
-        Longitude,
-        Latitude,
-        Longitude,
+        const Latitude &,
+        const Longitude &,
+        const Latitude &,
+        const Longitude &,
         const Ellipsoid &) const;
 };
 
