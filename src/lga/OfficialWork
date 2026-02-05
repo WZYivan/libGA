@@ -8,6 +8,7 @@
 
 #include <lga/Base>
 #include <lga/Math>
+#include <lga/Angle>
 
 M_libga_begin
 
@@ -30,6 +31,15 @@ namespace param
                     return 40 * std::sqrt(p_l);
                 };
             } elev;
+
+            struct
+            {
+                std::function<double(double, double)>
+                    sixty_sqrt_a = [](double p_n, double p_l) -> double
+                {
+                    return 60 * std::sqrt(p_n);
+                };
+            } traverse;
         } tolerence;
     };
 #if !(M_libga_with_impl)
