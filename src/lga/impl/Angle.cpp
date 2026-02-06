@@ -143,6 +143,22 @@ Angle Angle::abs() const
 {
     return Angle(std::abs(m_radian));
 }
+Angle Angle::std() const
+{
+    double rad = m_radian;
+
+    while (rad > 2 * internal::pi)
+    {
+        rad -= 2 * internal::pi;
+    }
+
+    while (rad < 0)
+    {
+        rad += 2 * internal::pi;
+    }
+
+    return Angle(rad);
+}
 
 Angle Angle::zero()
 {

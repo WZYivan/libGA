@@ -95,6 +95,7 @@ public:
 
     Angle norm() const;
     Angle normSym() const;
+    Angle std() const;
     Angle abs() const;
 
     static Angle zero();
