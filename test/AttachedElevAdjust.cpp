@@ -9,13 +9,21 @@ int main()
         distance = {1.6, 2.1, 1.7, 2.0},
         diff = {2.331, 2.813, -2.224, 1.430};
 
-    lga::DataFrame df = lga::attachedElevAdjust(
+    lga::Adjust_Result result = lga::attachedElevAdjust(
         distance,
         diff,
         45.286,
         49.579);
 
-    df.write<
+    std::cout << "> Frame:\n";
+    result.frame.write<
+        std::ostream,
+        std::string,
+        double>(
+        std::cout, hmdf::io_format::csv2);
+
+    std::cout << "> Info frame:\n";
+    result.info_frame.write<
         std::ostream,
         std::string,
         double>(
