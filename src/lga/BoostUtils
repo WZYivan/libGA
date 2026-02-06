@@ -1,0 +1,26 @@
+#ifndef M_libga_utils
+#define M_libga_utils
+
+#include <boost/json.hpp>
+
+#include <lga/Base>
+#include <lga/Angle>
+
+M_libga_begin
+
+    double
+    enfore2double(const boost::json::value &p_bst_j_val);
+
+Angle enfore2angle(const boost::json::array &p_bst_j_arr);
+
+void preprocessJsonStr(
+    std::string &p_str,
+    const boost::json::parse_options &p_opt);
+
+M_libga_end
+
+#if (M_libga_with_impl)
+#include <lga/impl/BoostUtils.cpp>
+#endif
+
+#endif
