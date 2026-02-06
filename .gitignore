@@ -8,4 +8,5 @@ src/lga/unsupported/*
 
 *.toml
 
-log.csv
+log.*
+*.log
