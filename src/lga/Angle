@@ -20,7 +20,8 @@ M_libga_begin
         dms{"{:1s}{:03d}d{:02d}m{:.3f}s"},
         ddmmss{"{:1s}{:03d}.{:02d}{:02.0f}"},
         u_dms{"{:0s}{:03d}d{:02d}m{:.3f}s"},
-        u_ddmmss{"{:0s}{:03d}.{:02d}{:02.0f}"};
+        u_ddmmss{"{:0s}{:03d}.{:02d}{:02.0f}"},
+        json_array{"[{:1s}{:d}, {:2d}, {:.3f}]"};
 }
 
 namespace config
