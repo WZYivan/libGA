@@ -2,19 +2,34 @@
 
 int main()
 {
+    std::vector<lga::Angle> left_angle = {
+        {107, 48, 30},
+        {73, 0, 24},
+        {89, 33, 48},
+        {89, 36, 30}};
+    std::vector<double> distance = {
+        105.22, 80.18, 129.34, 78.16};
+    lga::Angle angle_beg{125, 30, 0};
+    double x_beg = 500, y_beg = 600;
+    lga::Adjust_Result result =
+        lga::closedTraverseAdjust(
+            left_angle,
+            distance,
+            angle_beg,
+            x_beg,
+            y_beg);
 
-    lga::DataFrame df;
-    lga::DataFrameColumnIndices indices = {0, 1};
-    df.load_index(std::move(indices));
-    std::vector<lga::Angle> angles{
-        {1, 2, 3},
-        {4, 5, 6}};
-    df.load_column("Angle", angles);
+    lga::config::angle.output_fmt = "{:1s} {:03d} d {:02d} m {:05.1f} s";
 
-    lga::config::angle.output_fmt = "{:s} {:03d} d {:02d} m {:02f}";
+    std::cout << ">Frame:\n";
+    result.frame.write<
+        lga::Angle,
+        double>("./frame.log.csv", hmdf::io_format::csv2);
+    std::cout << ">Info frame:\n";
+    result.info_frame.write<
+        std::string,
+        lga::Angle,
+        double>("./info_frame.log.csv", hmdf::io_format::csv2);
 
-    df.write<
-        std::ostream,
-        lga::Angle>(
-        std::cout, hmdf::io_format::csv2);
+    lga::resetConfig(lga::config::angle);
 }
