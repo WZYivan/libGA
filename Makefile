@@ -84,12 +84,10 @@ clean-lib:
 LINK_CATCH2 := -lCatch2Main -lCatch2 
 DEF_CATCH2 := -DCATCH_CONFIG_MAIN
 
-LINK_LGA := -lga -Wl,-rpath=$(BIN_DIR)
+LINK_LGA := -lga -Wl,-rpath=$(BIN_DIR) -Wl,-rpath=$(LIB_DIR) -lDataFrame -ltbb -lboost_json
 DEF_LGA ?= #-DLGA_HEADER_ONLY
 
-LINK_DEPS := -lDataFrame -ltbb
-
-LINK_FOR_TEST := $(LINK_CATCH2) $(LINK_LGA) $(LINK_DEPS)
+LINK_FOR_TEST := $(LINK_CATCH2) $(LINK_LGA) 
 
 TEST_BUILD_DIR := $(TEST_DIR)/build
 TEST_OBJ_DIR := $(TEST_BUILD_DIR)/obj
