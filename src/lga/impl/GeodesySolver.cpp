@@ -347,8 +347,6 @@ basselFormulaForward(
         tanA2 = std::tan(A2);
     A2 = internal::adjustA2(A2, sinA1, tanA2);
 
-    M_libga_b("bassel_formula.forward before return");
-
     return {
         .lat = Latitude(B2),
         .lon = Longitude(L2),
