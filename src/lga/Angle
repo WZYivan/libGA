@@ -32,6 +32,19 @@ namespace config
     static inline Angle angle = {};
 }
 
+class Angle;
+
+namespace internal
+{
+    struct Angle_Format_Wrapper
+    {
+        const Angle &angle;
+        std::string_view fmt;
+    };
+
+    std::ostream &operator<<(std::ostream &os, const Angle_Format_Wrapper &p_afw);
+}
+
 class Angle
 {
 public:
@@ -88,6 +101,8 @@ public:
     static Angle singlePi();
     static Angle doublePi();
 
+    internal::Angle_Format_Wrapper format(std::string_view p_fmt) const noexcept;
+
 private:
     double m_radian;
 };
@@ -140,7 +155,6 @@ inline std::ostream &operator<<(std::ostream &os, const Angle &angle)
     os << angle.toString(config::angle.output_fmt);
     return os;
 }
-
 
 M_libga_end
 

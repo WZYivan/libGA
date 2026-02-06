@@ -6,8 +6,8 @@ M_libga_begin
 {
     const double pi = std::numbers::pi;
     const std::array<double (*)(double), 3> angle_converters = {
-        &deg2rad, 
-        &min2rad, 
+        &deg2rad,
+        &min2rad,
         &sec2rad};
     const double
         __deg2rad = pi / 180.0,
@@ -194,6 +194,25 @@ std::string Angle::toString(std::string_view p_format) const
                                               d,
                                               m,
                                               s));
+}
+
+internal::Angle_Format_Wrapper
+Angle::
+    format(std::string_view p_fmt) const noexcept
+{
+    return internal::Angle_Format_Wrapper{
+        .angle = *this,
+        .fmt = p_fmt};
+}
+
+std::ostream &
+internal::
+operator<<(
+    std::ostream &os,
+    const Angle_Format_Wrapper &p_afw)
+{
+    os << p_afw.angle.toString(p_afw.fmt);
+    return os;
 }
 
 double dms2rad(double p_d, double p_m, double p_s)
