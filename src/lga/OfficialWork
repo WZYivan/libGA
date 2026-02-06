@@ -17,6 +17,12 @@ using DataFrameColumnIndices = std::vector<size_t>;
 using StrDataFrame = hmdf::StdDataFrame<std::string>;
 using StrDataFrameColumnIndices = std::vector<std::string>;
 
+struct Adjust_Result
+{
+    DataFrame frame;
+    DataFrame info_frame;
+};
+
 namespace param
 {
     struct Official_Work
@@ -60,7 +66,7 @@ namespace internal
         std::function<double(double)> p_fn);
 }
 
-DataFrame
+Adjust_Result
 closedElevAdjust(
     std::vector<double> &p_distances,
     std::vector<double> &p_diff,
@@ -68,7 +74,7 @@ closedElevAdjust(
     int p_correction_precision = 3,
     std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
 
-DataFrame
+Adjust_Result
 attachedElevAdjust(
     std::vector<double> &p_distances,
     std::vector<double> &p_diff,
@@ -77,7 +83,7 @@ attachedElevAdjust(
     int p_correction_precision = 3,
     std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
 
-DataFrame
+Adjust_Result
 closedTraverseAdjust(
     std::vector<Angle> &p_left_angle,
     std::vector<double> &p_distance,
@@ -93,6 +99,7 @@ M_libga_end
 #if (M_libga_with_impl)
 #include <lga/impl/OfficialWorkUtils.cpp>
 #include <lga/impl/OfficialWorkElevAdjust.cpp>
+#include <lga/impl/OfficialWorkTraverseAdjust.cpp>
 #endif
 
 #endif

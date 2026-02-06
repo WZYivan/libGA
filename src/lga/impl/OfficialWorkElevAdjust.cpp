@@ -7,7 +7,7 @@
 
 M_libga_begin
 
-    DataFrame
+    Adjust_Result
     closedElevAdjust(
         std::vector<double> &p_distances,
         std::vector<double> &p_diff,
@@ -32,7 +32,8 @@ M_libga_begin
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
 
-    DataFrame df;
+    Adjust_Result result{};
+    DataFrame &df = result.frame;
     df.load_index(std::move(indices));
     df.load_column("distance", std::move(p_distances));
     df.load_column("diff", std::move(p_diff));
@@ -91,25 +92,36 @@ M_libga_begin
     double corrected_dif_sum = zeroOr(sum_v.get_result());
     df.load_column("elev", std::move(elev));
 
+    DataFrame &info = result.info_frame;
+    DataFrameColumnIndices info_indices(4);
+    std::iota(info_indices.begin(), info_indices.end(), 0);
+    info.load_index(std::move(info_indices));
+
     std::vector<std::string> sum_idx_col{
         "distances", "diff", "correction", "corrected diff"};
     std::vector<double> sum_col{
         distance_sum, diff_sum, correction_sum, corrected_dif_sum};
-    df.load_column("sum of(name)", std::move(sum_idx_col));
-    df.load_column("sum of(val)", std::move(sum_col));
+    info.load_column("sum of(name)", std::move(sum_idx_col));
+    info.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence:mm", "mean correction",
-        "distance => km"};
+        "closure", "tolerence", "mean correction"};
     std::vector<double> info_col{
         closure, tolerence, mean_correction};
-    df.load_column("info(name)", std::move(info_idx_col));
-    df.load_column("info(val)", std::move(info_col));
+    info.load_column("info(name)", std::move(info_idx_col));
+    info.load_column("info(val)", std::move(info_col));
 
-    return df;
+    std::vector<std::string> unit_name_col{
+        "distance", "tolerence", "default"};
+    std::vector<std::string> unit_val_col{
+        "km", "mm", "m"};
+    info.load_column("unit(name)", std::move(unit_name_col));
+    info.load_column("unit(val)", std::move(unit_val_col));
+
+    return result;
 }
 
-DataFrame
+Adjust_Result
 attachedElevAdjust(
     std::vector<double> &p_distances,
     std::vector<double> &p_diff,
@@ -135,7 +147,8 @@ attachedElevAdjust(
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
 
-    DataFrame df;
+    Adjust_Result result{};
+    DataFrame &df = result.frame;
     df.load_index(std::move(indices));
     df.load_column("distance", std::move(p_distances));
     df.load_column("diff", std::move(p_diff));
@@ -194,21 +207,32 @@ attachedElevAdjust(
     double corrected_dif_sum = zeroOr(sum_v.get_result());
     df.load_column("elev", std::move(elev));
 
+    DataFrame &info = result.info_frame;
+    DataFrameColumnIndices info_indices(4);
+    std::iota(info_indices.begin(), info_indices.end(), 0);
+    info.load_index(std::move(info_indices));
+
     std::vector<std::string> sum_idx_col{
         "distances", "diff", "correction", "corrected diff"};
     std::vector<double> sum_col{
         distance_sum, diff_sum, correction_sum, corrected_dif_sum};
-    df.load_column("sum of(name)", std::move(sum_idx_col));
-    df.load_column("sum of(val)", std::move(sum_col));
+    info.load_column("sum of(name)", std::move(sum_idx_col));
+    info.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence:mm", "mean correction", "expect target elev",
-        "distance => km"};
+        "closure", "tolerence", "mean correction", "expect target elev"};
     std::vector<double> info_col{
         closure, tolerence, mean_correction, p_end};
-    df.load_column("info(name)", std::move(info_idx_col));
-    df.load_column("info(val)", std::move(info_col));
+    info.load_column("info(name)", std::move(info_idx_col));
+    info.load_column("info(val)", std::move(info_col));
 
-    return df;
+    std::vector<std::string> unit_name_col{
+        "distance", "tolerence", "default"};
+    std::vector<std::string> unit_val_col{
+        "km", "mm", "m"};
+    info.load_column("unit(name)", std::move(unit_name_col));
+    info.load_column("unit(val)", std::move(unit_val_col));
+
+    return result;
 }
 M_libga_end
