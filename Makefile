@@ -14,8 +14,9 @@ NC := \033[0m
 
 
 # path
-INCLUDE_DIR := ./include
-LIB_DIR := ./lib
+EXTRA_INSTALL_DIR := /home/azusa/file/libs/install
+INCLUDE_DIR := $(EXTRA_INSTALL_DIR)/include
+LIB_DIR := $(EXTRA_INSTALL_DIR)/lib
 SRC_DIR := ./src/lga
 BIN_DIR := ./bin
 OBJ_DIR := ./obj
@@ -83,7 +84,7 @@ clean-lib:
 LINK_CATCH2 := -lCatch2Main -lCatch2 
 DEF_CATCH2 := -DCATCH_CONFIG_MAIN
 
-LINK_LGA := -Bdynamic -l:libga.so -Wl,-rpath=$(BIN_DIR)
+LINK_LGA := -lga -Wl,-rpath=$(BIN_DIR)
 DEF_LGA ?= #-DLGA_HEADER_ONLY
 
 LINK_DEPS := -lDataFrame -ltbb
