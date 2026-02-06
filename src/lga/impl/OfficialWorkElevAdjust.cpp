@@ -26,7 +26,7 @@ M_libga_begin
                 p_diff.size()));
     }
 
-    double closure = std::accumulate(p_diff.begin(), p_diff.end(), 0.0) * 1000;
+    double closure = std::accumulate(p_diff.begin(), p_diff.end(), 0.0);
     double tolerence = internal::calcTolerence(p_distances, p_tolerence_fn);
 
     DataFrameColumnIndices indices(size + 1);
@@ -44,7 +44,7 @@ M_libga_begin
     double diff_sum = sum_v.get_result();
 
     double correction_sum = cut(
-        -1000 * diff_sum,
+        -1 * diff_sum,
         p_correction_precision);
     double mean_correction = cut(
         correction_sum / (distance_sum),
@@ -74,7 +74,7 @@ M_libga_begin
     for (auto idx = 0uz; idx != size; ++idx)
     {
         corrected_diff.at(idx) =
-            diff.at(idx) + corrections.at(idx) / 1000;
+            diff.at(idx) + corrections.at(idx);
     }
 
     std::vector<double> elev(size + 1);
@@ -99,7 +99,8 @@ M_libga_begin
     df.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence", "mean correction"};
+        "closure", "tolerence:mm", "mean correction",
+        "distance => km"};
     std::vector<double> info_col{
         closure, tolerence, mean_correction};
     df.load_column("info(name)", std::move(info_idx_col));
@@ -146,7 +147,7 @@ attachedElevAdjust(
     double diff_sum = sum_v.get_result();
 
     double correction_sum = cut(
-        -1000 * closure,
+        -1 * closure,
         p_correction_precision);
     double mean_correction = cut(
         correction_sum / (distance_sum),
@@ -176,7 +177,7 @@ attachedElevAdjust(
     for (auto idx = 0uz; idx != size; ++idx)
     {
         corrected_diff.at(idx) =
-            diff.at(idx) + corrections.at(idx) / 1000;
+            diff.at(idx) + corrections.at(idx);
     }
 
     std::vector<double> elev(size + 1);
@@ -201,7 +202,8 @@ attachedElevAdjust(
     df.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence", "mean correction", "expect target elev"};
+        "closure", "tolerence:mm", "mean correction", "expect target elev",
+        "distance => km"};
     std::vector<double> info_col{
         closure, tolerence, mean_correction, p_end};
     df.load_column("info(name)", std::move(info_idx_col));
