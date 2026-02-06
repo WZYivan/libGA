@@ -1,7 +1,9 @@
-Angle diff=cpp
-Base diff=cpp
-Error diff=cpp
-Geodesy diff=cpp
-Linalg diff=cpp
-Math diff=cpp
-Photogrammetry diff=cpp
+Angle diff=cpp linguist-language=C++
+Base diff=cpp linguist-language=C++
+BoostUtils diff=cpp linguist-language=C++
+Error diff=cpp linguist-language=C++
+Geodesy diff=cpp linguist-language=C++
+Linalg diff=cpp linguist-language=C++
+Math diff=cpp linguist-language=C++
+OfficialWork diff=cpp linguist-language=C++
+Photogrammetry diff=cpp linguist-language=C++
