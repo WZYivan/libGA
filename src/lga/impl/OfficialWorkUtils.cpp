@@ -46,7 +46,11 @@ namespace internal
         const std::vector<double> &p_vec,
         std::function<double(double)> p_fn)
     {
-        return p_fn(std::accumulate(p_vec.begin(), p_vec.end(), 0.0));
+        return p_fn(
+            std::accumulate(
+                p_vec.begin(),
+                p_vec.end(),
+                0.0));
     }
 
 }

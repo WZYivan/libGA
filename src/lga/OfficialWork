@@ -35,7 +35,7 @@ namespace param
             struct
             {
                 std::function<double(double, double)>
-                    sixty_sqrt_a = [](double p_n, double p_l) -> double
+                    sixty_sqrt_n = [](double p_n, double p_l) -> double
                 {
                     return 60 * std::sqrt(p_n);
                 };
@@ -65,7 +65,7 @@ closedElevAdjust(
     std::vector<double> &p_distances,
     std::vector<double> &p_diff,
     double p_beg,
-    int p_correction_precision = 0,
+    int p_correction_precision = 3,
     std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
 
 DataFrame
@@ -74,8 +74,19 @@ attachedElevAdjust(
     std::vector<double> &p_diff,
     double p_beg,
     double p_end,
-    int p_correction_precision = 0,
+    int p_correction_precision = 3,
     std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
+
+DataFrame
+closedTraverseAdjust(
+    std::vector<Angle> &p_left_angle,
+    std::vector<double> &p_distance,
+    const Angle &p_angle_beg,
+    double p_x_beg,
+    double p_y_beg,
+    int p_angle_correction_precision = 0,
+    int p_distance_correction_precision = 2,
+    std::function<double(double, double)> p_tolerence_fn = param::official_work.tolerence.traverse.sixty_sqrt_n);
 
 M_libga_end
 
