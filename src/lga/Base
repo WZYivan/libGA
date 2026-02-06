@@ -58,4 +58,13 @@
 #define M_libga_hp false
 #endif
 
+M_libga_begin
+
+template <typename Config>
+void resetConfig(Config & p_config){
+    p_config = Config {};
+}
+
+M_libga_end
+
 #endif
