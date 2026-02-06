@@ -10,5 +10,6 @@ src/lga/unsupported/*
 
 log.*
 *.log
+*.log.*
 
 tmp
