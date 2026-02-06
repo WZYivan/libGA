@@ -202,10 +202,4 @@ double dms2rad(double p_d, double p_m, double p_s)
     return dms2rad(dms.begin(), dms.end());
 }
 
-std::ostream &operator<<(std::ostream &os, const Angle &angle)
-{
-    os << angle.toString(config::angle.output_fmt);
-    return os;
-}
-
 M_libga_end

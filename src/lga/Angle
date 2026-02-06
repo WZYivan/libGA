@@ -16,12 +16,12 @@ M_libga_begin
 
     namespace fmt
 {
-    std::string_view
+    inline const std::string_view
         dms{"{:1s}{:03d}d{:02d}m{:.3f}s"},
         ddmmss{"{:1s}{:03d}.{:02d}{:02.0f}"},
         u_dms{"{:0s}{:03d}d{:02d}m{:.3f}s"},
         u_ddmmss{"{:0s}{:03d}.{:02d}{:02.0f}"};
-};
+}
 
 namespace config
 {
@@ -135,7 +135,11 @@ double dms2rad(Iter p_begin, Iter p_end)
 
 double dms2rad(double p_d, double p_m, double p_s);
 
-std::ostream &operator<<(std::ostream &os, const Angle &angle);
+inline std::ostream &operator<<(std::ostream &os, const Angle &angle)
+{
+    os << angle.toString(config::angle.output_fmt);
+    return os;
+}
 
 
 M_libga_end
