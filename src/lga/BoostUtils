@@ -1,10 +1,11 @@
-#ifndef M_libga_utils
-#define M_libga_utils
+#ifndef M_libga_boost_utils
+#define M_libga_boost_utils
 
 #include <boost/json.hpp>
 
 #include <lga/Base>
 #include <lga/Angle>
+#include <lga/impl/Concepts.hpp>
 
 M_libga_begin
 
@@ -17,7 +18,34 @@ void preprocessJsonStr(
     std::string &p_str,
     const boost::json::parse_options &p_opt);
 
+namespace internal
+{
+
+    template <typename Iter>
+    inline std::string
+    format2jsonArray(
+        Iter p_begin,
+        Iter p_end,
+        std::function<std::string(Iter)> p_conv);
+
+    template <typename Iter>
+    inline std::string
+    format2jsonArray(Iter p_begin, Iter p_end);
+}
+
+template <typename Range>
+inline std::string
+format2jsonArray(Range p_range);
+
+template <typename Range, typename Conv_Fn>
+inline std::string
+format2jsonArray(
+    Range p_range,
+    Conv_Fn p_conv);
+
 M_libga_end
+
+#include <lga/impl/BoostUtils.hpp>
 
 #if (M_libga_with_impl)
 #include <lga/impl/BoostUtils.cpp>
