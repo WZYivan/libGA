@@ -16,7 +16,7 @@ M_libga_begin
 
     namespace fmt
 {
-    constexpr std::string_view
+    std::string_view
         dms{"{:1s}{:03d}d{:02d}m{:.3f}s"},
         ddmmss{"{:1s}{:03d}.{:02d}{:02.0f}"},
         u_dms{"{:0s}{:03d}d{:02d}m{:.3f}s"},
@@ -35,79 +35,80 @@ namespace config
 class Angle
 {
 public:
-    explicit constexpr Angle(const double p_rad) : m_radian(p_rad) {}
+    explicit Angle(const double p_rad) : m_radian(p_rad) {}
     Angle() : Angle(0.0) {}
-    constexpr Angle(std::initializer_list<double> il);
+    Angle(std::initializer_list<double> il);
 
-    constexpr static Angle fromSeconds(double p_seconds);
-    constexpr static Angle fromMinutes(double p_minutes);
-    constexpr static Angle fromDegrees(double p_degrees);
-    constexpr static Angle fromRadian(double p_rad);
-    constexpr static Angle fromDMS(double p_d, double p_m, double p_s, bool p_sign = false);
-    constexpr double toSeconds() const;
-    constexpr double toMinutes() const;
-    constexpr double toDegrees() const;
-    constexpr double toRadian() const;
-    constexpr double seconds() const;
-    constexpr int minutes() const;
-    constexpr int degrees() const;
-    constexpr std::tuple<int, int, double> toDMS() const;
+    static Angle fromSeconds(double p_seconds);
+    static Angle fromMinutes(double p_minutes);
+    static Angle fromDegrees(double p_degrees);
+    static Angle fromRadian(double p_rad);
+    static Angle fromDMS(double p_d, double p_m, double p_s, bool p_sign = false);
+    double toSeconds() const;
+    double toMinutes() const;
+    double toDegrees() const;
+    double toRadian() const;
+    double seconds() const;
+    int minutes() const;
+    int degrees() const;
+    std::tuple<int, int, double> toDMS() const;
 
-    constexpr static Angle fromString(std::string_view p_str, std::string_view p_pattern = R"(([+-])?(\d{1,}).(\d{2})(\d{1,}))");
-    inline std::string toString(std::string_view p_format = fmt::dms) const;
+    static Angle fromString(std::string_view p_str, std::string_view p_pattern = R"(([+-])?(\d{1,}).(\d{2})(\d{1,}))");
+    std::string toString(std::string_view p_format = fmt::dms) const;
 
-    constexpr double sin() const;
-    constexpr double cos() const;
-    constexpr double tan() const;
-    constexpr double sec() const;
-    constexpr double csc() const;
-    constexpr double cot() const;
+    double sin() const;
+    double cos() const;
+    double tan() const;
+    double sec() const;
+    double csc() const;
+    double cot() const;
 
-    constexpr Angle operator+(const Angle &) const;
-    constexpr Angle operator-(const Angle &) const;
-    constexpr Angle operator-() const;
-    constexpr friend Angle operator*(const Angle &, double);
-    constexpr friend Angle operator*(double, const Angle &);
-    constexpr friend Angle operator/(const Angle &, double);
-    constexpr friend Angle operator/(double, const Angle &);
-    constexpr Angle operator%(const Angle &) const;
-    constexpr double operator/(const Angle &) const;
+    Angle operator+(const Angle &) const;
+    Angle operator-(const Angle &) const;
+    Angle operator-() const;
+    friend Angle operator*(const Angle &, double);
+    friend Angle operator*(double, const Angle &);
+    friend Angle operator/(const Angle &, double);
+    friend Angle operator/(double, const Angle &);
+    Angle operator%(const Angle &) const;
+    double operator/(const Angle &) const;
 
-    constexpr bool withinAbs(const Angle &, double p_threshold = 1e-5) const;
-    constexpr bool ltAbs(const Angle &, double p_threshold = 1e-5) const;
-    constexpr bool gtAbs(const Angle &, double p_threshold = 1e-5) const;
-    constexpr bool lt(const Angle &) const;
-    constexpr bool gt(const Angle &) const;
-    constexpr bool eqApprox(const Angle &, double p_threshold = 1e-5) const;
+    bool withinAbs(const Angle &, double p_threshold = 1e-5) const;
+    bool ltAbs(const Angle &, double p_threshold = 1e-5) const;
+    bool gtAbs(const Angle &, double p_threshold = 1e-5) const;
+    bool lt(const Angle &) const;
+    bool gt(const Angle &) const;
+    bool eqApprox(const Angle &, double p_threshold = 1e-5) const;
 
-    constexpr Angle norm() const;
-    constexpr Angle normSym() const;
-    constexpr Angle abs() const;
+    Angle norm() const;
+    Angle normSym() const;
+    Angle abs() const;
 
-    static constexpr Angle zero();
-    static constexpr Angle singlePi();
-    static constexpr Angle doublePi();
+    static Angle zero();
+    static Angle singlePi();
+    static Angle doublePi();
 
 private:
     double m_radian;
 };
 
-constexpr double pi = std::numbers::pi;
+double sec2rad(double);
+double min2rad(double);
+double deg2rad(double);
+double rad2sec(double);
+double rad2min(double);
+double rad2deg(double);
 
-constexpr double sec2rad(double);
-constexpr double min2rad(double);
-constexpr double deg2rad(double);
-constexpr double rad2sec(double);
-constexpr double rad2min(double);
-constexpr double rad2deg(double);
-
+#if !(M_libga_with_impl)
 namespace internal
 {
-    constexpr std::array<double (*)(double), 3> angle_converters{&deg2rad, &min2rad, &sec2rad};
+    extern const double pi;
+    extern const std::array<double (*)(double), 3> angle_converters;
 }
+#endif
 
 template <typename Iter>
-constexpr double dms2rad(Iter p_begin, Iter p_end)
+double dms2rad(Iter p_begin, Iter p_end)
     requires std::convertible_to<decltype(*p_begin), double>
 {
     size_t size = std::distance(p_begin, p_end);
@@ -132,20 +133,15 @@ constexpr double dms2rad(Iter p_begin, Iter p_end)
     return rad * (sign ? -1 : 1);
 }
 
-constexpr double dms2rad(double p_d, double p_m, double p_s)
-{
-    std::array<double, 3> dms{p_d, p_m, p_s};
-    return dms2rad(dms.begin(), dms.end());
-}
+double dms2rad(double p_d, double p_m, double p_s);
 
-inline std::ostream &operator<<(std::ostream &os, const Angle &angle)
-{
-    os << angle.toString(config::angle.output_fmt);
-    return os;
-}
+std::ostream &operator<<(std::ostream &os, const Angle &angle);
+
 
 M_libga_end
 
-#include <lga/impl/Angle.hpp>
+#if (M_libga_with_impl)
+#include <lga/impl/Angle.cpp>
+#endif
 
 #endif
