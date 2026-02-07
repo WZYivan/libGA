@@ -1,10 +1,4 @@
-# !/bin/zsh
-
-.DEFAULT_GOAL := all
-
-# sys
-SHELL := zsh
-RM := rm -f
+.DEFAULT_GOAL := shared-lib
 
 RED := \033[0;31m
 GREEN := \033[0;32m
@@ -12,123 +6,146 @@ YELLOW := \033[1;33m
 BLUE := \033[0;34m
 NC := \033[0m 
 
+CXX ?= g++
+VERSION := 23
+CXX += -std=gnu++$(VERSION) -fPIC
+CXX += -Wno-interference-size # depress warning from DataFrame
+BUILD_TYPE ?= Debug
+AR := ar rcs
+OPTIMIZE ?= 1
+RM := rm -rf
+RUNTIME_LINK := 
 
-# path
-EXTRA_INSTALL_DIR := /home/azusa/file/libs/install
-INCLUDE_DIR := $(EXTRA_INSTALL_DIR)/include
-LIB_DIR := $(EXTRA_INSTALL_DIR)/lib
-SRC_DIR := ./src/lga
-BIN_DIR := ./bin
-OBJ_DIR := ./obj
-TEST_DIR := ./test
-BUILD_DIR := $(TEST_DIR)/build
-
-# toolchian
-CXX := g++
-CXX_FLAGS := -std=gnu++23 \
-	-I$(INCLUDE_DIR) \
-	-I./src \
-	-L$(LIB_DIR) \
-	-L$(BIN_DIR) \
-	-Wno-interference-size
-
-BUILD_TYPE ?= Release
-
-COMPILE := $(CXX) $(CXX_FLAGS)
-COMPILE_TEST := $(COMPILE) -g -DLGA_DEBUG
 ifeq ($(BUILD_TYPE), Debug)
-	COMPILE += -g -DLGA_DEBUG
+CXX += -g
 endif
-MK_STATIC := ar rcs
-MK_DYNAMIC := $(CXX) -fPIC -shared
 
-# targets
-CPP_FILES := $(wildcard $(SRC_DIR)/impl/*.cpp )
-OBJ_FILES :=  $(addprefix $(OBJ_DIR)/, $(notdir $(CPP_FILES:.cpp=.o)))
-
-
-# make lib
-.PHONY: lib
-ifdef STATIC_LIB
-LIB_NAME := libga.a
-else
-LIB_NAME :=
+ifeq ($(BUILD_TYPE), Release)
+CXX += -O$(OPTIMIZE)
 endif
-DLIB_NAME := libga.so
-lib: $(BIN_DIR) $(OBJ_DIR) $(OBJ_FILES) $(LIB_NAME) $(DLIB_NAME)
-	@echo "> compile $(LIB_NAME) $(DLIB_NAME) over"
 
-$(OBJ_DIR):
+MY_LOCAL_INSTALL := /home/azusa/file/libs/install
+THIRD_PARTY_ROOT ?= $(MY_LOCAL_INSTALL)
+CXX += -I$(THIRD_PARTY_ROOT)/include -L$(THIRD_PARTY_ROOT)/lib
+RUNTIME_LINK += -Wl,-rpath=$(THIRD_PARTY_ROOT)/lib
+
+BOOST_ROOT ?= $(THIRD_PARTY_ROOT)
+BOOST_INCLUDE_DIR := $(BOOST_ROOT)/include
+BOOST_LIB_DIR := $(BOOST_ROOT)/lib
+ifneq ($(BOOST_ROOT), $(THIRD_PARTY_ROOT))
+CXX += -I$(BOOST_INCLUDE_DIR) -L$(BOOST_LIB_DIR)
+RUNTIME_LINK += -Wl,-rpath=$(BOOST_LIB_DIR)
+endif
+
+EIGEN3_ROOT ?= $(THIRD_PARTY_ROOT)
+EIGEN3_INCLUDE_DIR := $(EIGEN3_ROOT)/include
+EIGEN3_LIB_DIR := $(EIGEN3_ROOT)/lib
+ifneq ($(EIGEN3_ROOT), $(THIRD_PARTY_ROOT))
+CXX += -I$(EIGEN3_INCLUDE_DIR) -L$(EIGEN3_LIB_DIR)
+RUNTIME_LINK += -Wl,-rpath=$(EIGEN3_LIB_DIR)
+endif
+
+DATAFRAME_ROOT ?= $(THIRD_PARTY_ROOT)
+DATAFRAME_INCLUDE_DIR := $(DATAFRAME_ROOT)/include
+DATAFRAME_LIB_DIR := $(DATAFRAME_ROOT)/lib
+ifneq ($(DATAFRAME_ROOT), $(THIRD_PARTY_ROOT))
+CXX += -I$(DATAFRAME_INCLUDE_DIR) -L$(DATAFRAME_LIB_DIR)
+RUNTIME_LINK += -Wl,-rpath=$(DATAFRAME_LIB_DIR)
+endif
+
+ONETBB_ROOT ?= $(THIRD_PARTY_ROOT)
+ONETBB_INCLUDE_DIR := $(ONETBB_ROOT)/include
+ONETBB_LIB_DIR := $(ONETBB_ROOT)/lib
+ifneq ($(ONETBB_ROOT), $(THIRD_PARTY_ROOT))
+CXX += -I$(ONETBB_INCLUDE_DIR) -L$(ONETBB_LIB_DIR)
+RUNTIME_LINK += -Wl,-rpath=$(ONETBB_LIB_DIR)
+endif
+
+LGA_INCLUDE_DIR := ./src
+LGA_LIB_DIR := ./lib
+CXX += -I$(LGA_INCLUDE_DIR) -L$(LGA_LIB_DIR)
+LGA_LIB_OBJ_DIR := $(LGA_LIB_DIR)/obj
+LGA_LIB_CPP := $(wildcard $(LGA_INCLUDE_DIR)/lga/impl/*.cpp)
+LGA_LIB_OBJ :=  $(addprefix $(LGA_LIB_OBJ_DIR)/, $(notdir $(LGA_LIB_CPP:.cpp=.o)))
+LGA_LIB_NAME := libga.so
+LGA_STATIC_LIB_NAME := libga_static.a
+RUNTIME_LINK += -Wl,-rpath=$(LGA_LIB_DIR)
+
+LGA_LIB_LINK := -lDataFrame -ltbb -lboost_json $(RUNTIME_LINK)
+LGA_LIB_DEF := 
+ifeq ($(BUILD_TYPE), Debug)
+LGA_LIB_DEF += -DLGA_DEBUG
+endif
+
+LGA_TEST_DIR := ./test
+LGA_TEST_OBJ_DIR := $(LGA_TEST_DIR)/obj
+LGA_TEST_EXE_DIR :=  $(LGA_TEST_DIR)/bin
+LGA_TEST_CPP_DIR := $(LGA_TEST_DIR)
+LGA_TEST_CPP := $(wildcard $(LGA_TEST_CPP_DIR)/*.cpp)
+LGA_TEST_OBJ :=  $(addprefix $(LGA_TEST_OBJ_DIR)/, $(notdir $(LGA_TEST_CPP:.cpp=.o)))
+LGA_TEST_EXE :=  $(addprefix $(LGA_TEST_EXE_DIR)/, $(notdir $(LGA_TEST_CPP:.cpp=)))
+LGA_TEST_LINK := -lga $(LGA_LIB_LINK) -lCatch2Main -lCatch2 $(RUNTIME_LINK)
+LGA_TEST_DEF := -DLGA_DEBUG -DCATCH_CONFIG_MAIN
+.PRECIOUS := $(LGA_TEST_OBJ)
+
+
+shared-lib: $(LGA_LIB_DIR)/$(LGA_LIB_NAME)
+
+static-lib: $(LGA_LIB_DIR)/$(LGA_STATIC_LIB_NAME)
+	
+$(LGA_LIB_DIR): $(LGA_LIB_OBJ_DIR) 
 	@mkdir -p $@
 
-$(BIN_DIR):
+$(LGA_LIB_OBJ_DIR):
 	@mkdir -p $@
 
-$(OBJ_DIR)/%.o : $(SRC_DIR)/impl/%.cpp
-	$(COMPILE) -fPIC -c $< -o $@
-    
-$(LIB_NAME): $(OBJ_FILES)
-	$(MK_STATIC) $(BIN_DIR)/$@ $^
+$(LGA_LIB_DIR)/$(LGA_LIB_NAME): $(LGA_LIB_OBJ)  | $(LGA_LIB_DIR) 
+	$(CXX) -shared $^ -o $(LGA_LIB_DIR)/$(LGA_LIB_NAME) $(LGA_LIB_LINK) 
 
-$(DLIB_NAME): $(OBJ_FILES)
-	$(MK_DYNAMIC) -o $(BIN_DIR)/$@ $^
+$(LGA_LIB_DIR)/$(LGA_STATIC_LIB_NAME): $(LGA_LIB_OBJ)  | $(LGA_LIB_DIR) 
+	$(AR) $@ $^
 
-.PHONY: clean-lib
-clean-lib: 
-	-$(RM) $(BIN_DIR)/$(LIB_NAME)
-	-$(RM) $(BIN_DIR)/$(DLIB_NAME)
-	-$(RM) -r $(OBJ_DIR)
+$(LGA_LIB_OBJ_DIR)/%.o : $(LGA_INCLUDE_DIR)/lga/impl/%.cpp
+	$(CXX) -c $< -o $@ $(LGA_LIB_DEF)
 
-# build test
+test-exe:  $(LGA_TEST_OBJ) $(LGA_TEST_EXE)
+# 	$(RM) $(LGA_TEST_OBJ_DIR)
 
-LINK_CATCH2 := -lCatch2Main -lCatch2 
-DEF_CATCH2 := -DCATCH_CONFIG_MAIN
+$(LGA_TEST_EXE_DIR)/%: $(LGA_TEST_OBJ_DIR)/%.o | $(LGA_TEST_EXE_DIR)
+	$(CXX) $< -o $@ $(LGA_TEST_LINK)
 
-LINK_LGA := -lga -Wl,-rpath=$(BIN_DIR) -Wl,-rpath=$(LIB_DIR) -lDataFrame -ltbb -lboost_json
-DEF_LGA ?= #-DLGA_HEADER_ONLY
+$(LGA_TEST_OBJ_DIR)/%.o: $(LGA_TEST_CPP_DIR)/%.cpp | $(LGA_TEST_OBJ_DIR)
+	$(CXX) -c $< -o $@ $(LGA_TEST_DEF)
 
-LINK_FOR_TEST := $(LINK_CATCH2) $(LINK_LGA) 
-
-TEST_BUILD_DIR := $(TEST_DIR)/build
-TEST_OBJ_DIR := $(TEST_BUILD_DIR)/obj
-TEST_CPP := $(wildcard $(TEST_DIR)/*.cpp)
-TEST_OBJ := $(addprefix $(TEST_OBJ_DIR)/, $(notdir $(TEST_CPP:.cpp=.o)))
-TEST_EXE := $(addprefix $(TEST_BUILD_DIR)/, $(notdir $(TEST_CPP:.cpp=)))
-
-.PHONY: test 
-test: $(TEST_OBJ_DIR) $(TEST_OBJ) $(TEST_EXE)
-
-$(TEST_OBJ_DIR)/%.o: $(TEST_DIR)/%.cpp
-	@mkdir -p $(dir $@)
-	$(COMPILE_TEST) -c $< -o $@ $(DEF_CATCH2) $(DEF_LGA)
-
-$(TEST_BUILD_DIR)/%: $(TEST_OBJ_DIR)/%.o
-	@mkdir -p $(dir $@)
-	$(COMPILE_TEST) $< -o $@ $(LINK_FOR_TEST)
-
-$(TEST_OBJ_DIR): $(TEST_BUILD_DIR)
+$(LGA_TEST_OBJ_DIR):
 	@mkdir -p $@
 
-$(TEST_BUILD_DIR):
+$(LGA_TEST_EXE_DIR):
 	@mkdir -p $@
 
-.PHONY: clean-test
-clean-test:
-	rm -rf $(TEST_OBJ_DIR) $(TEST_BUILD_DIR)
+clean: 
+	$(RM) $(LGA_TEST_OBJ_DIR)
+	$(RM) $(LGA_TEST_EXE_DIR)
+	$(RM) $(LGA_LIB_OBJ_DIR)
+
+clean-test: 
+	$(RM) $(LGA_TEST_OBJ_DIR)
+	$(RM) $(LGA_TEST_EXE_DIR)
+
+clean-lib-obj:
+	$(RM) $(LGA_LIB_OBJ_DIR)
+
+clean-test-obj:
+	$(RM) $(LGA_TEST_OBJ_DIR)
+
+clean-test-exe:
+	$(RM) $(LGA_TEST_EXE_DIR)
 
 run:
-	@find $(BUILD_DIR) -type f -executable \
+	@find $(LGA_TEST_EXE_DIR) -type f -executable \
 		-exec echo -e "$(YELLOW)> Running {}$(NC)" \; \
 		-exec echo "" \; \
 		-exec {} \; \
+		-exec echo "" \; \
 		-exec echo -e "$(YELLOW)-------------------------------------------------------------------------------$(NC)" \; \
 		-exec echo "" \;
-
-run-test: $(BUILD_DIR) test run
-	@echo "Running all executables in $(BUILD_DIR)"
-
-clean: clean-lib clean-test
-
-all: test lib 
-
-
