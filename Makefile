@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := shared-lib
+.DEFAULT_GOAL := help
 
 RED := \033[0;31m
 GREEN := \033[0;32m
@@ -9,7 +9,7 @@ NC := \033[0m
 CXX ?= g++
 VERSION := 23
 CXX += -std=gnu++$(VERSION) -fPIC
-CXX += -Wno-interference-size # depress warning from DataFrame
+CXX += -Wno-interference-size # depress warning from libDataFrame
 BUILD_TYPE ?= Debug
 AR := ar rcs
 OPTIMIZE ?= 1
@@ -141,6 +141,21 @@ clean-test-obj:
 clean-test-exe:
 	$(RM) $(LGA_TEST_EXE_DIR)
 
+INSTALL_PREFIX ?= ./install-dir
+HEADER_DEST_DIR := $(INSTALL_PREFIX)/include
+LIB_DEST_DIR := $(INSTALL_PREFIX)/lib
+
+install: shared-lib static-lib | $(LIB_DEST_DIR) $(HEADER_DEST_DIR)
+	cp -r $(LGA_INCLUDE_DIR)/lga $(HEADER_DEST_DIR)/lga
+	cp $(LGA_LIB_DIR)/$(LGA_LIB_NAME) $(LIB_DEST_DIR)/$(LGA_LIB_NAME)
+	cp $(LGA_LIB_DIR)/$(LGA_STATIC_LIB_NAME) $(LIB_DEST_DIR)/$(LGA_STATIC_LIB_NAME)
+
+$(LIB_DEST_DIR):
+	@mkdir -p $@
+
+$(HEADER_DEST_DIR):
+	@mkdir -p $@
+
 run:
 	@find $(LGA_TEST_EXE_DIR) -type f -executable \
 		-exec echo -e "$(YELLOW)> Running {}$(NC)" \; \
@@ -149,3 +164,37 @@ run:
 		-exec echo "" \; \
 		-exec echo -e "$(YELLOW)-------------------------------------------------------------------------------$(NC)" \; \
 		-exec echo "" \;
+
+help:
+	@echo "This is a Makefile 100% hand-writing wihtout AI or stuff. It may get bug or something else."
+	@echo "-------------------------------------------------------------------------------------------"
+	@echo "$(YELLOW)> Targets$(NC)"
+	@echo "$(GREEN)"
+	@echo "help$(NC)"
+	@echo "====> print this help doc"
+	@echo "$(GREEN)"
+	@echo "shared-lib$(NC)"
+	@echo "==========> build libga.so"
+	@echo "$(GREEN)"
+	@echo "static-lib$(NC)"
+	@echo "==========> build libga_static.a"
+	@echo "$(GREEN)"
+	@echo "install$(NC)"
+	@echo "=======> install all lib and header to $(BLUE)INSTALL_PREFIX/$(NC)"
+	@echo "$(YELLOW)> Options$(NC)"
+	@echo "$(BLUE)"
+	@echo "INSTALL_PREFIX$(NC) = install-dir"
+	@echo "==============> install to INSTALL_PREFIX/include and INSTALL_PREFIX/lib"
+	@echo "$(BLUE)"
+	@echo "BUILD_TYPE$(NC) = Debug|Release"
+	@echo "$(RED)"
+	@echo "THIRD_PARTY_ROOT$(NC) = $(BLUE)MY_LOCAL_INSTALL$(NC)"
+	@echo "================> where to get 3rd party libraries,$(RED)this must be set coz MY_LOCAL_INSTALL is my local folder$(NC)"
+	@echo "$(BLUE)"
+	@echo "<LIB_NAME>_ROOT$(NC)"
+	@echo "==============> where to get specified library [BOOST|DATAFRAME|ONETBB|EIGEN3|CATCH2]"
+	@echo "$(BLUE)"
+	@echo "CXX$(NC) = g++|..."
+	@echo "===> never test in other compiler, and this depends on $(RED)C++23$(NC)"
+	@echo "$(BLUE)"
+	@echo "OPTIMIZE$(NC) = 1|2|3|..."
