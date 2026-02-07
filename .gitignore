@@ -1,9 +1,15 @@
+*.o
+
 .vscode/*
+
 include/*
 lib/*
-*.o
+.bak/*
+
+build/*
 test/build/*
 bin/*
+test/bin/*
 src/lga/unsupported/*
 
 *.toml
