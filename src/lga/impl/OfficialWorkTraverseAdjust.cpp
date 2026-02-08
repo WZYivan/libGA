@@ -14,7 +14,7 @@ M_libga_begin
         double p_y_beg,
         int p_angle_correction_precision,
         int p_distance_correction_precision,
-        std::function<double(double, double)> p_tolerence_fn)
+        std::function<double(double, double)> p_tolerance_fn)
 {
     size_t size = p_left_angle.size();
 
@@ -48,7 +48,7 @@ M_libga_begin
     double f_beta = cut(
         left_angle_sum.toSeconds() - f_beta_expect * 3600,
         p_angle_correction_precision);
-    double tolerence = p_tolerence_fn(size, distance_sum);
+    double tolerance = p_tolerance_fn(size, distance_sum);
     std::vector<double> angle_correction(
         size,
         -cut(
@@ -238,7 +238,7 @@ M_libga_begin
     std::vector<std::string> aux_info_name_col{
         "f beta",
         "f beta expect",
-        "tolerence",
+        "tolerance",
         "f x",
         "f y",
         "f",
@@ -246,7 +246,7 @@ M_libga_begin
     std::vector<double> aux_info_val_col{
         f_beta,
         f_beta_expect,
-        tolerence,
+        tolerance,
         f_x,
         f_y,
         f,
@@ -255,7 +255,7 @@ M_libga_begin
         "angle correction",
         "f beta",
         "f beta expect",
-        "tolerence",
+        "tolerance",
         "K",
         "default"};
     std::vector<std::string> unit_val_col{

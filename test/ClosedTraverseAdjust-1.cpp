@@ -31,5 +31,5 @@ int main()
         lga::Angle,
         double>("./info_frame.log.csv", hmdf::io_format::csv2);
 
-    lga::resetConfig(lga::config::angle);
+    lga::reset(lga::config::angle);
 }

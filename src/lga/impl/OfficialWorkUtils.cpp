@@ -13,12 +13,12 @@ namespace internal
         std::vector<double> &p_vec,
         double p_sum,
         double p_target,
-        int p_precesion)
+        int p_precision)
     {
         double unit =
-            p_precesion > 0 ? std::pow(0.1, p_precesion) : 1.0;
-        double dif = cut(p_sum - p_target, p_precesion);
-        unit = cut(unit, p_precesion);
+            p_precision > 0 ? std::pow(0.1, p_precision) : 1.0;
+        double dif = cut(p_sum - p_target, p_precision);
+        unit = cut(unit, p_precision);
         bool dif_sign = std::signbit(dif);
         unit = dif_sign ? -unit : unit;
         int count = dif / unit;
@@ -36,7 +36,7 @@ namespace internal
             {
                 auto min = std::min_element(p_vec.begin(), p_vec.end());
                 idx = std::distance(p_vec.begin(), min);
-                double val = cut(p_vec.at(idx) - unit, p_precesion);
+                double val = cut(p_vec.at(idx) - unit, p_precision);
                 p_vec.at(idx) = val;
             }
         }
@@ -46,7 +46,7 @@ namespace internal
             {
                 auto max = std::max_element(p_vec.begin(), p_vec.end());
                 idx = std::distance(p_vec.begin(), max);
-                double val = cut(p_vec.at(idx) - unit, p_precesion);
+                double val = cut(p_vec.at(idx) - unit, p_precision);
                 p_vec.at(idx) = val;
             }
         }
@@ -54,7 +54,7 @@ namespace internal
         return;
     }
 
-    double calcTolerence(
+    double calcTolerance(
         const std::vector<double> &p_vec,
         std::function<double(double)> p_fn)
     {

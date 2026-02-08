@@ -13,7 +13,7 @@ M_libga_begin
         std::vector<double> &p_diff,
         double p_beg,
         int p_correction_precision,
-        std::function<double(double)> p_tolerence_fn)
+        std::function<double(double)> p_tolerance_fn)
 {
     size_t size = p_distances.size();
 
@@ -27,7 +27,7 @@ M_libga_begin
     }
 
     double closure = std::accumulate(p_diff.begin(), p_diff.end(), 0.0);
-    double tolerence = internal::calcTolerence(p_distances, p_tolerence_fn);
+    double tolerance = internal::calcTolerance(p_distances, p_tolerance_fn);
 
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
@@ -105,14 +105,14 @@ M_libga_begin
     info.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence", "mean correction"};
+        "closure", "tolerance", "mean correction"};
     std::vector<double> info_col{
-        closure, tolerence, mean_correction};
+        closure, tolerance, mean_correction};
     info.load_column("info(name)", std::move(info_idx_col));
     info.load_column("info(val)", std::move(info_col));
 
     std::vector<std::string> unit_name_col{
-        "distance", "tolerence", "default"};
+        "distance", "tolerance", "default"};
     std::vector<std::string> unit_val_col{
         "km", "mm", "m"};
     info.load_column("unit(name)", std::move(unit_name_col));
@@ -128,7 +128,7 @@ attachedElevAdjust(
     double p_beg,
     double p_end,
     int p_correction_precision,
-    std::function<double(double)> p_tolerence_fn)
+    std::function<double(double)> p_tolerance_fn)
 {
     size_t size = p_distances.size();
 
@@ -142,7 +142,7 @@ attachedElevAdjust(
     }
 
     double closure = std::accumulate(p_diff.begin(), p_diff.end(), 0.0) - (p_end - p_beg);
-    double tolerence = internal::calcTolerence(p_distances, p_tolerence_fn);
+    double tolerance = internal::calcTolerance(p_distances, p_tolerance_fn);
 
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
@@ -220,14 +220,14 @@ attachedElevAdjust(
     info.load_column("sum of(val)", std::move(sum_col));
 
     std::vector<std::string> info_idx_col{
-        "closure", "tolerence", "mean correction", "expect target elev"};
+        "closure", "tolerance", "mean correction", "expect target elev"};
     std::vector<double> info_col{
-        closure, tolerence, mean_correction, p_end};
+        closure, tolerance, mean_correction, p_end};
     info.load_column("info(name)", std::move(info_idx_col));
     info.load_column("info(val)", std::move(info_col));
 
     std::vector<std::string> unit_name_col{
-        "distance", "tolerence", "default"};
+        "distance", "tolerance", "default"};
     std::vector<std::string> unit_val_col{
         "km", "mm", "m"};
     info.load_column("unit(name)", std::move(unit_name_col));

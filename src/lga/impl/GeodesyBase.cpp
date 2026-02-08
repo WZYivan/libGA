@@ -93,8 +93,8 @@ Ellipsoid_Quarter_Arc_Length_Adjust_Function::operator()(double p_len) const
 
 namespace internal
 {
-    Ellipsoid_Principle_Curvature_Radius_Linerization_Coefficient
-    calcEllipsoid_Principle_Curvature_Radius_Linerization_Coefficient(
+    Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient
+    calcEllipsoid_Principle_Curvature_Radius_Linearization_Coefficient(
         const Ellipsoid_Geometry_Property &p_geometry)
     {
         double a = p_geometry.a, e2 = p_geometry.e1_2;
@@ -111,9 +111,9 @@ namespace internal
         return {m0, m2, m4, m6, m8, n0, n2, n4, n6, n8};
     }
 
-    Ellipsoid_Quarter_Arc_Linerization_Coefficient
-    calcEllipsoid_Quarter_Arc_Linerization_Coefficient(
-        const Ellipsoid_Principle_Curvature_Radius_Linerization_Coefficient &p_pre_coeff)
+    Ellipsoid_Quarter_Arc_Linearization_Coefficient
+    calcEllipsoid_Quarter_Arc_Linearization_Coefficient(
+        const Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient &p_pre_coeff)
     {
         double
             m0 = p_pre_coeff.m0,
@@ -148,12 +148,12 @@ namespace internal
     calcEllipsoid_Property(
         const Ellipsoid_Geometry_Property &p_geo)
     {
-        Ellipsoid_Principle_Curvature_Radius_Linerization_Coefficient
+        Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient
             prc_coeff =
-                calcEllipsoid_Principle_Curvature_Radius_Linerization_Coefficient(p_geo);
-        Ellipsoid_Quarter_Arc_Linerization_Coefficient
+                calcEllipsoid_Principle_Curvature_Radius_Linearization_Coefficient(p_geo);
+        Ellipsoid_Quarter_Arc_Linearization_Coefficient
             qa_coeff =
-                calcEllipsoid_Quarter_Arc_Linerization_Coefficient(prc_coeff);
+                calcEllipsoid_Quarter_Arc_Linearization_Coefficient(prc_coeff);
         return Ellipsoid{
             .geometry{p_geo},
             .principle_curvature_radius_coeff{prc_coeff},
@@ -161,7 +161,7 @@ namespace internal
     }
 
     Ellipsoid
-    calcKarsovski()
+    calcKrassovsky()
     {
         auto p{
             calcEllipsoid_Property({.a = 6'378'245,
@@ -278,7 +278,7 @@ namespace internal
 }
 
 const Ellipsoid
-    krasovski{internal::calcKarsovski()},
+    krassovsky{internal::calcKrassovsky()},
     ie1975{internal::calcIE1975()},
     wgs84{internal::calcWGS84()},
     cgcs2000{internal::calcCGCS2000()};
@@ -316,7 +316,7 @@ double meanCurvatureRadius(const Ellipsoid_Principle_Curvature_Radius &p_pcr)
 
 double meridianArcLength(const Latitude &p_lat, const Ellipsoid &p_ellipsoid)
 {
-    const Ellipsoid_Quarter_Arc_Linerization_Coefficient &
+    const Ellipsoid_Quarter_Arc_Linearization_Coefficient &
         coeff{p_ellipsoid.quarter_arc_coeff};
     double a0 = coeff.a0,
            a2 = coeff.a2,
@@ -354,7 +354,7 @@ Latitude meridianArcBottom(double p_len, const Ellipsoid &p_ellipsoid)
             coeff.a4 * std::sin(4 * Bf_cur) -
             coeff.a6 * std::sin(6 * Bf_cur);
         Bf_next = deg2rad((p_len - FB) / coeff.a0); // deg -> rad
-    } while (Bf_next - Bf_cur >= config::geodesy.meridian_arc_buttom.threshold);
+    } while (Bf_next - Bf_cur >= config::geodesy.meridian_arc_bottom.threshold);
     return Latitude(Bf_cur + dB); // return rad
 }
 

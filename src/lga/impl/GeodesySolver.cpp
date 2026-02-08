@@ -34,7 +34,7 @@ Geodetic_Solver::operator()(
         p_ellipsoid);
 }
 
-struct Bassel_Formula_Coeff
+struct Bessel_Formula_Coeff
 {
     double A, B, C, alpha, beta, beta_prime;
 };
@@ -61,12 +61,12 @@ struct Gauss_Lemma_Coeff
 
 namespace internal
 {
-    Bassel_Formula_Coeff
+    Bessel_Formula_Coeff
     calcBesselFormulaCoeff(
         double cosA0p2,
         const Ellipsoid &p_ellipsoid)
     {
-        Bassel_Formula_Coeff coeff;
+        Bessel_Formula_Coeff coeff;
 
         double
             e2 = p_ellipsoid.geometry.e1_2,
@@ -286,7 +286,7 @@ namespace internal
 }
 
 Geodetic_Forward_Solve_Result
-basselFormulaForward(
+besselFormulaForward(
     const Latitude &p_B1,
     const Longitude &p_L1,
     double p_S,
@@ -311,7 +311,7 @@ basselFormulaForward(
         sin_2sigma1 = 2.0 * cot_sigma1 / (cot_sigma1p2 + 1),
         cos_2sigma1 = (cot_sigma1p2 - 1) / (cot_sigma1p2 + 1);
 
-    Bassel_Formula_Coeff coeff_solver{
+    Bessel_Formula_Coeff coeff_solver{
         internal::calcBesselFormulaCoeff(
             cosA0p2,
             p_ellipsoid)};
@@ -354,7 +354,7 @@ basselFormulaForward(
 }
 
 Geodetic_Inverse_Solve_Result
-basselFormulaInverse(
+besselFormulaInverse(
     const Latitude &B1,
     const Longitude &L1,
     const Latitude &B2,
@@ -422,7 +422,7 @@ basselFormulaInverse(
             cosA0p2 = 1 - sinA0p2;
         x = 2 * a1 - cosA0p2 * cos_sigma;
 
-        Bassel_Formula_Coeff coeff_solver = internal::calcBesselFormulaCoeff(
+        Bessel_Formula_Coeff coeff_solver = internal::calcBesselFormulaCoeff(
             cosA0p2,
             ellipsoid);
         double
@@ -434,8 +434,8 @@ basselFormulaInverse(
 
     } while (
         !(
-            std::abs(delta - delta_p) < config::geodesy.bassel_formula_solve.threshold &&
-            std::abs(lambda - lambda_p) < config::geodesy.bassel_formula_solve.threshold));
+            std::abs(delta - delta_p) < config::geodesy.bessel_formula_solve.threshold &&
+            std::abs(lambda - lambda_p) < config::geodesy.bessel_formula_solve.threshold));
 
     double
         sinA0p2 = std::pow(sinA0, 2),
@@ -448,7 +448,7 @@ basselFormulaInverse(
         cos_lambda = std::cos(lambda),
         y = (cosA0p4 - 2 * x2) * cos_sigma;
 
-    Bassel_Formula_Coeff coeff_solver = internal ::calcBesselFormulaCoeff(cosA0p2, ellipsoid);
+    Bessel_Formula_Coeff coeff_solver = internal ::calcBesselFormulaCoeff(cosA0p2, ellipsoid);
     double
         A = coeff_solver.A,
         B_pp = 2 * coeff_solver.B / cosA0p2,
@@ -569,8 +569,8 @@ const Geodetic_Solver
     gauss_lemma_solve{
         .forward{gaussLemmaForward},
         .inverse{gaussLemmaInverse}},
-    bassel_formula_solve{
-        .forward{basselFormulaForward},
-        .inverse{basselFormulaInverse}};
+    bessel_formula_solve{
+        .forward{besselFormulaForward},
+        .inverse{besselFormulaInverse}};
 
 M_libga_end

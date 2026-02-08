@@ -15,7 +15,7 @@ double zeroOr(double p_x, double p_threshold = 1e-5);
 
 double round465(double);
 
-double cut(double, int p_precesion);
+double cut(double, int p_precision);
 
 struct Unary_Function
 {

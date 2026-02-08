@@ -14,7 +14,7 @@ M_libga_begin
         struct
         {
             double threshold = 1e-5;
-        } bassel_formula_solve;
+        } bessel_formula_solve; // -> bessel
 
         struct
         {
@@ -24,7 +24,7 @@ M_libga_begin
         struct
         {
             double threshold = 1e-5;
-        } meridian_arc_buttom;
+        } meridian_arc_bottom;
     };
 
 #if !(M_libga_with_impl)
@@ -105,12 +105,12 @@ struct Ellipsoid_Geometry_Property
     double a, b, c, alpha, e1_2, e2_2;
 };
 
-struct Ellipsoid_Principle_Curvature_Radius_Linerization_Coefficient
+struct Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient // -> Linearization
 {
     double m0, m2, m4, m6, m8, n0, n2, n4, n6, n8;
 };
 
-struct Ellipsoid_Quarter_Arc_Linerization_Coefficient
+struct Ellipsoid_Quarter_Arc_Linearization_Coefficient
 {
     double a0, a2, a4, a6;
 };
@@ -127,8 +127,8 @@ struct Ellipsoid_Quarter_Arc_Length_Adjust_Function : public Unary_Function
 struct Ellipsoid_Property
 {
     Ellipsoid_Geometry_Property geometry;
-    Ellipsoid_Principle_Curvature_Radius_Linerization_Coefficient principle_curvature_radius_coeff;
-    Ellipsoid_Quarter_Arc_Linerization_Coefficient
+    Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient principle_curvature_radius_coeff;
+    Ellipsoid_Quarter_Arc_Linearization_Coefficient
         quarter_arc_coeff;
     Ellipsoid_Quarter_Arc_Length_Adjust_Function
         quarter_arc_length_adjust_fn;
@@ -147,7 +147,7 @@ struct Ellipsoid_Geometry_Latitude_Aux
 };
 
 #if !(M_libga_with_impl)
-extern const Ellipsoid krasovski, ie1975, wgs84, cgcs2000;
+extern const Ellipsoid krassovsky, ie1975, wgs84, cgcs2000; // Krassovsky
 #endif
 
 struct Ellipsoid_Principle_Curvature_Radius
@@ -213,7 +213,7 @@ struct Geodetic_Solver
 };
 
 #if !(M_libga_with_impl)
-extern const Geodetic_Solver gauss_lemma_solve, bassel_formula_solve;
+extern const Geodetic_Solver gauss_lemma_solve, bessel_formula_solve;
 #endif
 
 struct Geodetic_Coordinate

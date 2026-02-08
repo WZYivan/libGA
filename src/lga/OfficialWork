@@ -1,5 +1,5 @@
-#ifndef M_libga_offical_work
-#define M_libga_offical_work
+#ifndef M_libga_official_work
+#define M_libga_official_work
 
 #include <vector>
 #include <string>
@@ -46,7 +46,7 @@ namespace param
                     return 60 * std::sqrt(p_n);
                 };
             } traverse;
-        } tolerence;
+        } tolerance;
     };
 #if !(M_libga_with_impl)
     extern const Official_Work official_work;
@@ -59,9 +59,9 @@ namespace internal
         std::vector<double> &p_vec,
         double p_sum,
         double p_target,
-        int p_precesion);
+        int p_precision);
 
-    double calcTolerence(
+    double calcTolerance(
         const std::vector<double> &p_vec,
         std::function<double(double)> p_fn);
 }
@@ -72,7 +72,7 @@ closedElevAdjust(
     std::vector<double> &p_diff,
     double p_beg,
     int p_correction_precision = 3,
-    std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
+    std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
 
 Adjust_Result
 attachedElevAdjust(
@@ -81,7 +81,7 @@ attachedElevAdjust(
     double p_beg,
     double p_end,
     int p_correction_precision = 3,
-    std::function<double(double)> p_tolerence_fn = param::official_work.tolerence.elev.forty_sqrt_l);
+    std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
 
 Adjust_Result
 closedTraverseAdjust(
@@ -92,7 +92,7 @@ closedTraverseAdjust(
     double p_y_beg,
     int p_angle_correction_precision = 0,
     int p_distance_correction_precision = 2,
-    std::function<double(double, double)> p_tolerence_fn = param::official_work.tolerence.traverse.sixty_sqrt_n);
+    std::function<double(double, double)> p_tolerance_fn = param::official_work.tolerance.traverse.sixty_sqrt_n);
 
 M_libga_end
 

@@ -13,12 +13,12 @@ int main()
     double S = 44'797.282'6;
 
     lga::Geodetic_Forward_Solve_Result rf =
-        lga::bassel_formula_solve(
+        lga::bessel_formula_solve(
             B1,
             L1,
             S,
             A1,
-            lga::krasovski);
+            lga::krassovsky);
     std::println(
         "L2 = {}, B2 = {}, A21 = {}",
         rf.lon.toString(lga::fmt::dms),
@@ -26,12 +26,12 @@ int main()
         rf.backward.toString(lga::fmt::dms));
 
     lga::Geodetic_Inverse_Solve_Result ri =
-        lga::bassel_formula_solve(
+        lga::bessel_formula_solve(
             B1,
             L1,
             rf.lat,
             rf.lon,
-            lga::krasovski);
+            lga::krassovsky);
     std::println(
         "A12 = {}, A21 = {}, S = {}",
         ri.forward.toString(lga::fmt::dms),
