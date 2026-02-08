@@ -513,6 +513,7 @@ namespace lga
      * @throw std::range_error if range size not in [1, 3]
      */
     template <typename Iter>
+        requires concepts::Iter_Like<Iter, double>
     inline double dms2rad(Iter p_begin, Iter p_end);
 
     /**

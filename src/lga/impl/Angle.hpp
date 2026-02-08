@@ -24,8 +24,8 @@ M_libga_begin
 }
 
 template <typename Iter>
+    requires concepts::Iter_Like<Iter, double>
 inline double dms2rad(Iter p_begin, Iter p_end)
-    requires std::convertible_to<decltype(*p_begin), double>
 {
     size_t size = std::distance(p_begin, p_end);
     if (!(size >= 0 && size <= 3))

@@ -114,6 +114,22 @@ namespace lga
             { *(r.begin()++) } -> std::same_as<decltype(*r.begin())>;
             { r.begin() == r.begin() } -> std::same_as<bool>;
         };
+
+        /**
+         * @brief `Iter iter` satisfy such constraints: \n
+         * 1. *iter is `convertible` to `Tar` \n
+         * 2. iter is comparable
+         * 3. iter support `operator++`
+         *
+         * @tparam Iter
+         * @tparam Tar
+         */
+        template <typename Iter, typename Tar>
+        concept Iter_Like = requires(Iter iter) {
+            { *iter } -> std::convertible_to<Tar>;
+            { iter == iter } -> std::same_as<bool>;
+            { iter++ } -> std::same_as<Iter>;
+        };
     }
 
     /**
