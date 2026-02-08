@@ -52,11 +52,14 @@ Matrix choleskyInverse(const Matrix &p)
     {
         return llt.solve(identityLike(p));
     }
-    else
+
+    Eigen::LDLT<Matrix> ldlt(p);
+    if (ldlt.info() == Eigen::Success)
     {
-        Eigen::LDLT<Matrix> ldlt(p);
         return ldlt.solve(identityLike(p));
     }
+
+    return svdInverse(p);
 }
 
 Matrix svdInverse(const Matrix &p)
@@ -142,7 +145,7 @@ namespace internal
         }
     }
 
-    void validateRotatoinMatrix(const Matrix &p_rotate)
+    void validateRotationMatrix(const Matrix &p_rotate)
     {
         if (!isValidRotationMatrix(p_rotate))
         {
@@ -167,14 +170,14 @@ Matrix translate(const Matrix &p_coord, double p_x, double p_y, double p_z)
 Matrix rotateForward(const Matrix &p_coord, const Matrix &p_rotate)
 {
     internal::validateCoordinateMatrix(p_coord);
-    internal::validateRotatoinMatrix(p_rotate);
+    internal::validateRotationMatrix(p_rotate);
     return p_coord * p_rotate;
 }
 
 Matrix rotateInverse(const Matrix &p_coord, const Matrix &p_rotate)
 {
     internal::validateCoordinateMatrix(p_coord);
-    internal::validateRotatoinMatrix(p_rotate);
+    internal::validateRotationMatrix(p_rotate);
     return p_coord * p_rotate.transpose();
 }
 

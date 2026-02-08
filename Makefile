@@ -166,7 +166,7 @@ run:
 		-exec echo "" \;
 
 help:
-	@echo "This is a Makefile 100% hand-writing wihtout AI or stuff. It may get bug or something else."
+	@echo "This is a Makefile 100% hand-writing without AI or stuff. It may get bug or something else."
 	@echo "-------------------------------------------------------------------------------------------"
 	@echo "$(YELLOW)> Targets$(NC)"
 	@echo "$(GREEN)"
@@ -198,3 +198,10 @@ help:
 	@echo "===> never test in other compiler, and this depends on $(RED)C++23$(NC)"
 	@echo "$(BLUE)"
 	@echo "OPTIMIZE$(NC) = 1|2|3|..."
+
+doxygen-doc:
+	@doxygen
+
+clean-dev:
+	$(RM) draft.cpp
+	@find -type f -name "*log*" -exec echo "remove {}" \; -exec $(RM) {} \;

@@ -1,3 +1,14 @@
+/**
+ * @file Linalg
+ * @author WZYivan (2270060975@qq.com)
+ * @brief liner algebra algorithm support using `Eigen3`
+ * @version 0.1
+ * @date 2026-02-08
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_linalg
 #define M_libga_linalg
 
@@ -7,56 +18,236 @@
 
 #include <lga/Base>
 
-M_libga_begin
+namespace lga
+{
 
     using Matrix = Eigen::MatrixXd;
-using Vector = Eigen::VectorXd;
+    using Vector = Eigen::VectorXd;
 
+/**
+ * @cond
+ * @brief a matrix = [0], is a placeholder of libGA
+ *
+ */
 #define M_libga_placeholder_matrix Matrix::Zero(1, 1)
+/** @endcond  */
+/**
+ * @brief a placeholder matrix
+ *
+ */
 #define LGA_PLACEHOLDER_MATRIX M_libga_placeholder_matrix
 
-void fillNan(Matrix &p_mat, double p_val);
-bool isPlaceHolder(const Matrix &);
-bool isValidCoordinate(const Matrix &p_coord);
-bool isValidRotationMatrix(const Matrix &p_coord);
-[[noreturn]] void matrixBadShape(int, int, int, int);
+    /**
+     * @brief fill nan in matrix with given value
+     *
+     * @param p_mat
+     * @param p_val
+     */
+    void fillNan(Matrix &p_mat, double p_val);
 
-Matrix normalizedEquation(const Matrix &p_A, const Matrix &p_P = M_libga_placeholder_matrix);
-Matrix identityLike(const Matrix &);
+    /**
+     * @brief predicate if a matrix is a placeholder
+     *
+     * @see LGA_PLACEHOLDER_MATRIX
+     * @return true
+     * @return false
+     */
+    bool isPlaceHolder(const Matrix &);
 
-Matrix choleskyInverse(const Matrix &);
-Matrix svdInverse(const Matrix &);
-using Matrix_Inverse_Solver = std::function<Matrix(const Matrix &)>;
+    /**
+     * @brief is a matrix can be used as coordinate set \n
+     * it looks like \n
+     * [ \n
+     *   [x1, y1, z1], \n
+     *   [x2, y2, z2], \n
+     *   ... \n
+     * ]
+     *
+     * @param p_coord
+     * @return true
+     * @return false
+     */
+    bool isValidCoordinate(const Matrix &p_coord);
 
-Matrix ols(const Matrix &p_A, const Matrix &p_L, const Matrix &p_P = M_libga_placeholder_matrix, std::function<Matrix(const Matrix &)> p_inv_func = choleskyInverse);
+    /**
+     * @brief is a matrix can be used as rotation matrix, its shape should be (3,3)
+     *
+     * @param p_coord
+     * @return true
+     * @return false
+     */
+    bool isValidRotationMatrix(const Matrix &p_coord);
 
-Matrix xRotation(double p_omega);
-Matrix yRotation(double p_phi);
-Matrix zRotation(double p_kappa);
-Matrix rotationMatrix(double p_x = 0, double p_y = 0, double p_z = 0);
+    /**
+     * @brief throw `Matrix_Bad_Shape`
+     * @see lga::Matrix_Bad_Shape
+     * @throw Matrix_Bad_Shape
+     */
+    [[noreturn]] void matrixBadShape(int, int, int, int);
 
-Matrix translate(const Matrix &p_coord, double p_x = 0, double p_y = 0, double p_z = 0);
-Matrix rotateForward(const Matrix &p_coord, const Matrix &p_rotate);
-Matrix rotateInverse(const Matrix &p_coord, const Matrix &p_rotate);
-Matrix scale(const Matrix &p_coord, double p_s);
+    /**
+     * @brief return `A.T * P * A`
+     *
+     * @param p_A
+     * @param p_P
+     * @return Matrix
+     */
+    Matrix normalizedEquation(const Matrix &p_A, const Matrix &p_P = M_libga_placeholder_matrix);
 
-double rmse(
-    const Matrix &p_v,
-    int n,
-    int t,
-    const Matrix &p_P = M_libga_placeholder_matrix);
-Matrix errorMatrix(double p_rmse, const Matrix &p_n);
+    /**
+     * @brief make a identity matrix like the given one
+     *
+     * @return Matrix
+     */
+    Matrix identityLike(const Matrix &);
+
+    /**
+     * @brief solve inverse matrix using `Eigen::LDT` then `Eigen::LDLT` last `svdInverse`
+     * @see svdInverse
+     * @return Matrix
+     */
+    Matrix choleskyInverse(const Matrix &);
+
+    /**
+     * @brief solve inverse matrix using `Eigen::JacobiSVD`
+     *
+     * @return Matrix
+     */
+    Matrix svdInverse(const Matrix &);
+
+    /**
+     * @brief Interface to get a handler to solve inverse of matrix
+     *
+     */
+    using Matrix_Inverse_Solver = std::function<Matrix(const Matrix &)>;
+
+    /**
+     * @brief return `(A.T * P * A)^(-1) * (A.T * P * L)`
+     *
+     * @param p_A coefficient
+     * @param p_L residual
+     * @param p_P weight
+     * @param p_inv_func inverse solve handler
+     * @return Matrix
+     */
+    Matrix ols(const Matrix &p_A, const Matrix &p_L, const Matrix &p_P = M_libga_placeholder_matrix, std::function<Matrix(const Matrix &)> p_inv_func = choleskyInverse);
+
+    /**
+     * @brief rotate following x axis
+     *
+     * @param p_omega
+     * @return Matrix
+     */
+    Matrix xRotation(double p_omega);
+
+    /**
+     * @brief rotate following y axis
+     *
+     * @param p_omega
+     * @return Matrix
+     */
+    Matrix yRotation(double p_phi);
+
+    /**
+     * @brief rotate following z axis
+     *
+     * @param p_omega
+     * @return Matrix
+     */
+    Matrix zRotation(double p_kappa);
+
+    /**
+     * @brief rotate in order of x -> y -> z
+     *
+     * @param p_x
+     * @param p_y
+     * @param p_z
+     * @return Matrix
+     */
+    Matrix rotationMatrix(double p_x = 0, double p_y = 0, double p_z = 0);
+
+    /**
+     * @brief translate coordinate system using vector (x, y, z)
+     *
+     * @param p_coord
+     * @param p_x
+     * @param p_y
+     * @param p_z
+     * @return Matrix
+     */
+    Matrix translate(const Matrix &p_coord, double p_x = 0, double p_y = 0, double p_z = 0);
+
+    /**
+     * @brief rotate coordinate system using rotation matrix
+     *
+     * @param p_coord
+     * @param p_rotate
+     * @return Matrix
+     */
+    Matrix rotateForward(const Matrix &p_coord, const Matrix &p_rotate);
+
+    /**
+     * @brief rotate coordinate system using rotation matrix in a inverse direction
+     *
+     * @param p_coord
+     * @param p_rotate
+     * @return Matrix
+     */
+    Matrix rotateInverse(const Matrix &p_coord, const Matrix &p_rotate);
+
+    /**
+     * @brief multiply all coordinate using given value
+     *
+     * @param p_coord
+     * @param p_s
+     * @return Matrix
+     */
+    Matrix scale(const Matrix &p_coord, double p_s);
+
+    /**
+     * @brief return `(V.T * P * V) / (n - t)`
+     *
+     * @param p_v correction
+     * @param n total observation
+     * @param t necessary observation
+     * @param p_P weight
+     * @return double
+     */
+    double rmse(
+        const Matrix &p_v,
+        int n,
+        int t,
+        const Matrix &p_P = M_libga_placeholder_matrix);
+
+    /**
+     * @brief error matrix `rmse * sqrt(N)`
+     *
+     * @see rmse
+     * @param p_rmse
+     * @param p_n
+     * @return Matrix
+     */
+    Matrix errorMatrix(double p_rmse, const Matrix &p_n);
 
 #if !(M_libga_with_impl)
-namespace fmt
-{
-    extern const Eigen::IOFormat
-        python,
-        csv;
-}
+    namespace fmt
+    {
+        extern const Eigen::IOFormat
+            /**
+             * @brief output like `numpy`
+             *
+             */
+            python,
+
+            /**
+             * @brief file format `.csv`
+             *
+             */
+            csv;
+    }
 #endif
 
-M_libga_end
+}
 
 #if (M_libga_with_impl)
 #include <lga/impl/Linalg.cpp>

@@ -35,11 +35,11 @@ lga::Latitude B1(lga::deg2rad(47.781291)); // 47°46'52.647"N
 lga::Longitude L1(lga::deg2rad(35.826758)); // 35°49'36.330"E
 
 // Perform geodetic forward calculation using Bessel formula
-lga::Geodetic_Forward_Solve_Result result = lga::bassel_formula_solve(
+lga::Geodetic_Forward_Solve_Result result = lga::bessel_formula_solve(
     B1, L1,                    // Starting point
     44797.2826,               // Distance (meters)
     lga::Angle::fromDMS(44, 12, 13.664), // Azimuth
-    lga::krasovski             // Reference ellipsoid
+    lga::krassovsky             // Reference ellipsoid
 );
 ```
 
@@ -113,7 +113,7 @@ lga::Matrix ground_coords = lga::spaceIntersection(
 #include <lga/Geodesy>
 
 lga::Latitude lat(lga::deg2rad(45.0)); // 45 degrees North
-auto curvature_radii = lga::principleCurvatureRadius(lat, lga::krasovski);
+auto curvature_radii = lga::principleCurvatureRadius(lat, lga::krassovsky);
 
 std::cout << "Meridian radius: " << curvature_radii.m << " m" << std::endl;
 std::cout << "Prime vertical radius: " << curvature_radii.n << " m" << std::endl;
@@ -123,7 +123,7 @@ std::cout << "Mean radius: " << lga::meanCurvatureRadius(curvature_radii) << " m
 ## Supported Ellipsoids
 
 The library includes predefined reference ellipsoids:
-- `lga::krasovski` - Krasovsky ellipsoid
+- `lga::krassovsky` - Krassovsky ellipsoid
 - `lga::ie1975` - International Earth 1975 ellipsoid
 - `lga::wgs84` - WGS84 ellipsoid
 - `lga::cgcs2000` - China Geodetic Coordinate System 2000 ellipsoid
@@ -148,16 +148,17 @@ make lib STATIC_LIB=1
 
 ## Usage
 
-The library provides namespaces and classes organized for geospatial computations:
+The library provides namespaces and classes organized for geomatics computations:
 - header:
     - `<lga/Angle>` - Angle handling and conversions
     - `<lga/Linalg>` - Linear algebra operations using Eigen
-    - `<lga/Math>` - Uitilies in mathmatics
-    - `<lga/Photogrammetry>` - Photogrammetric computations
+    - `<lga/Math>` - Utilities in mathematics
+    - `<lga/Photogrammetry>` - Photogrammetry computations
     - `<lga/Geodesy>` - Geodetic calculations and coordinate systems
+    - `<lga/OfficialWork>` - Frame for official work
 - namespace:
     - `lga` - Core namespace
-    - `lga::config` - Globally configure behaviour of some algorithms
+    - `lga::config` - Globally configure behavior of some algorithms
     - `lga::param` - Pre-defined object as input to avoid stupid mistake
 - rules of naming:
     - `Gauss_Projector`: class
@@ -171,4 +172,4 @@ The library provides namespaces and classes organized for geospatial computation
 The library supports several compile-time configuration options:
 - `LGA_HEADER_ONLY` - Enable header-only compilation
 - `LGA_DEBUG` - Enable debug output
-- `LGA_HIGH_PRECISION`(experimantal) - Enable high precision calculations
+- `LGA_HIGH_PRECISION`(experimental) - Enable high precision calculations

@@ -22,6 +22,6 @@ tmp
 
 latex/*
 html/*
-Doxyfile
+# Doxyfile
 
 draft.cpp

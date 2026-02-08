@@ -1,7 +1,13 @@
 /**
  * @file Base
  * @author WZYivan (227006975@qq.com)
- * @brief Basic header of libGA, defines macros, namespaces, concepts and enumerable constants
+ *
+ * @brief Basic header of libGA, defines macros, namespaces, concepts and enumerable constants. \n
+ * You can define several macros to modify internal behaviour:
+ * 1. `LGA_DEBUG`: enable debug output
+ * 2. `LGA_HEADER_ONLY`: include all implement file to compile without library file
+ * 3. `LGA_HIGH_PRECISION`: enable internal high precision patch
+ *
  * @version 0.1.0
  * @date 2026-02-08
  *
@@ -14,40 +20,58 @@
 
 #include <concepts>
 
-#define M_libga_version_major 0
-#define M_libga_version_minor 1
-#define M_libga_version_patch 0
+#define LGA_MAJOR 0
+#define LGA_MINOR 1
+#define LGA_PATCH 1
 
+/** @cond */
 #define M_libga_begin \
     namespace lga     \
     {
 #define M_libga_end }
+/** @endcond */
 
 #ifdef LGA_HEADER_ONLY
+/** @cond */
 #define M_libga_with_impl (true)
+/** @endcond */
 #else
+/** @cond */
 #define M_libga_with_impl (false)
+/** @endcond */
 #endif
 
 #include <lga/Error>
+/** @cond */
 #define M_libga_not_impl(P_reason) throw lga::Not_Implement_Error(P_reason)
+/** @endcond */
 
 #ifdef LGA_DEBUG
+/** @cond */
 #define M_libga_debug true
+/** @endcond */
 #include <print>
 #include <iostream>
 #if (__x86_64__)
+/** @cond */
 #define M_libga_b(P_reason) asm("int3");
+/** @endcond */
 #endif
 #else
+/** @cond */
 #define M_libga_debug false
 #define M_libga_b(P_reason)
+/** @endcond */
 #endif
 
 #ifdef LGA_HIGH_PRECISION
+/** @cond */
 #define M_libga_hp true
+/** @endcond */
 #else
+/** @cond */
 #define M_libga_hp false
+/** @endcond */
 #endif
 
 /**
