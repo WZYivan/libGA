@@ -44,7 +44,7 @@ int main()
             std::views::transform(
                 [](const bst_json::value &val) -> double
                 {
-                    return lga::enfore2double(val);
+                    return lga::enforce2double(val);
                 }) |
             std::ranges::to<std::vector<double>>()};
 
@@ -53,14 +53,14 @@ int main()
             std::views::transform(
                 [](const bst_json::value &val) -> lga::Angle
                 {
-                    return lga::enfore2angle(val.as_array());
+                    return lga::enforce2angle(val.as_array());
                 }) |
             std::ranges::to<std::vector<lga::Angle>>()};
 
-        lga::Angle angle_beg{lga::enfore2angle(j_angle_beg)};
+        lga::Angle angle_beg{lga::enforce2angle(j_angle_beg)};
         double
-            x_beg = lga::enfore2double(j_x_beg),
-            y_beg = lga::enfore2double(j_y_beg);
+            x_beg = lga::enforce2double(j_x_beg),
+            y_beg = lga::enforce2double(j_y_beg);
 
         auto result =
             lga::closedTraverseAdjust(

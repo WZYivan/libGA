@@ -1,3 +1,14 @@
+/**
+ * @file Angle.hpp
+ * @author WZYivan (227006975@qq.com)
+ * @brief Implement of compile time of `<lga/Angle>`
+ * @version 0.1.0
+ * @date 2026-02-08
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_impl_angle
 #define M_libga_impl_angle
 

@@ -1,3 +1,14 @@
+/**
+ * @file BoostUtils
+ * @author WZYivan (2270060975@qq.com)
+ * @brief utils for libGA and Boost
+ * @version 0.1
+ * @date 2026-02-08
+ * 
+ * @copyright Copyright (c) 2026
+ * 
+ */
+
 #ifndef M_libga_boost_utils
 #define M_libga_boost_utils
 
@@ -5,45 +16,78 @@
 
 #include <lga/Base>
 #include <lga/Angle>
-#include <lga/impl/Concepts.hpp>
 
-M_libga_begin
+namespace lga{
 
-    double
-    enfore2double(const boost::json::value &p_bst_j_val);
+/**
+ * @brief enforce to convert `boost::json::value` to `double`
+ * 
+ * @param p_bst_j_val 
+ * @return double `quiet_NaN` if failed
+ */
+double enforce2double(const boost::json::value &p_bst_j_val);
 
-Angle enfore2angle(const boost::json::array &p_bst_j_arr);
+/**
+ * @brief enforce to convert `boost::json::array` to `lga::Angle`
+ * 
+ * @param p_bst_j_arr 
+ * @return Angle `Angle(0.0)` if failed
+ */
+Angle enforce2angle(const boost::json::array &p_bst_j_arr);
 
+/**
+ * @brief remove of replace invalid token in string to fit constraints of boost::json,
+ * for example, remove "+" and replace "nan" by "NaN" or "null"
+ * 
+ * @param p_str 
+ * @param p_opt based on `boost::json::parse_options` to handle
+ */
 void preprocessJsonStr(
     std::string &p_str,
     const boost::json::parse_options &p_opt);
 
 namespace internal
 {
-
     template <typename Iter>
     inline std::string
     format2jsonArray(
         Iter p_begin,
         Iter p_end,
-        std::function<std::string(Iter)> p_conv);
+        std::function<std::string(Iter)> p_conv); ///< @private
 
     template <typename Iter>
     inline std::string
-    format2jsonArray(Iter p_begin, Iter p_end);
+    format2jsonArray(Iter p_begin, Iter p_end); ///< @private
 }
 
+/**
+ * @brief convert a iterable range to [<item1>, <item2>, ... ]
+ * 
+ * @tparam Range 
+ * @param p_range 
+ * @return std::string 
+ */
 template <typename Range>
 inline std::string
 format2jsonArray(Range p_range);
 
+/**
+ * @brief convert a iterable range to [<item1>, <item2>, ... ], but convert each item 
+ * using `p_conv`
+ * 
+ * @tparam Range 
+ * @tparam Conv_Fn 
+ * @param p_range 
+ * @param p_conv 
+ * @return std::string 
+ */
 template <typename Range, typename Conv_Fn>
 inline std::string
 format2jsonArray(
     Range p_range,
     Conv_Fn p_conv);
 
-M_libga_end
+}
 
 #include <lga/impl/BoostUtils.hpp>
 

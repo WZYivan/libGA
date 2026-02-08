@@ -9,7 +9,7 @@
 M_libga_begin
 
     double
-    enfore2double(const boost::json::value &p_bst_j_val)
+    enforce2double(const boost::json::value &p_bst_j_val)
 {
     const boost::json::value &val = p_bst_j_val;
 
@@ -34,7 +34,7 @@ M_libga_begin
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-Angle enfore2angle(const boost::json::array &p_bst_j_arr)
+Angle enforce2angle(const boost::json::array &p_bst_j_arr)
 {
     const boost::json::array &arr = p_bst_j_arr;
 
@@ -43,7 +43,7 @@ Angle enfore2angle(const boost::json::array &p_bst_j_arr)
         std::views::transform(
             [](const boost::json::value &val) -> double
             {
-                return enfore2double(val);
+                return enforce2double(val);
             })};
 
     return Angle(dms2rad(dms.begin(), dms.end()));
