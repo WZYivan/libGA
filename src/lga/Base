@@ -160,6 +160,14 @@ namespace lga
     }
 
     /**
+     * @brief predefined format pattern for class in `lga`
+     *
+     */
+    namespace fmt
+    {
+    }
+
+    /**
      * @brief all internal implement are defined here, never try to access or modify them
      *
      */

@@ -128,17 +128,6 @@ bool Angle::gt(const Angle &p_other) const
     return m_radian > p_other.m_radian;
 }
 
-Angle Angle::norm() const
-{
-    double rad = std::abs(m_radian);
-    rad = std::fmod(rad, 2 * internal::pi);
-    return Angle(rad);
-}
-Angle Angle::normSym() const
-{
-    M_libga_not_impl("I don't know what it exactly means.");
-    return this->norm() - Angle(internal::pi);
-}
 Angle Angle::abs() const
 {
     return Angle(std::abs(m_radian));

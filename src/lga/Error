@@ -1,3 +1,14 @@
+/**
+ * @file Error
+ * @author WZYivan (2270060975@qq.com)
+ * @brief Errors derived from `std::exception` thrown by libAG
+ * @version 0.1
+ * @date 2026-02-08
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_error
 #define M_libga_error
 
@@ -6,7 +17,8 @@
 
 #include <lga/Base>
 
-M_libga_begin
+namespace lga
+{
 
 #define M_libga_declare_error_with_msg_only(P_error, P_base) \
     class P_error : public P_base                            \
@@ -28,22 +40,26 @@ M_libga_begin
 
     M_libga_declare_error_with_msg_only(Not_Implement_Error, std::exception);
 
-class Matrix_Shape_Error : public std::exception
-{
-public:
-    Matrix_Shape_Error() noexcept;
-    Matrix_Shape_Error(const std::string &p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
-    Matrix_Shape_Error(const char *p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
-    const char *what() const noexcept override;
+    /**
+     * @brief shape of matrix doesn't satisfy expectation
+     *
+     */
+    class Matrix_Shape_Error : public std::exception
+    {
+    public:
+        Matrix_Shape_Error() noexcept;
+        Matrix_Shape_Error(const std::string &p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
+        Matrix_Shape_Error(const char *p_msg, int p_r, int p_c, int p_r_e, int p_c_e) noexcept;
+        const char *what() const noexcept override;
 
-private:
-    std::string m_prefix;
-    int m_row, m_col;
-    int m_row_e, m_col_e;
-    mutable std::string m_msg;
-};
+    private:
+        std::string m_prefix;
+        int m_row, m_col;
+        int m_row_e, m_col_e;
+        mutable std::string m_msg;
+    };
 
-M_libga_end
+}
 
 #if (M_libga_with_impl)
 #include <lga/impl/Error.cpp>
