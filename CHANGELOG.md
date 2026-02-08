@@ -14,6 +14,7 @@
 - :sparkles: add utils for boost
 - Add global concepts
 - Add json array format convert function
+- Add concept `Iter_Like`
 
 ### 🐛 Bug Fixes
 
@@ -21,6 +22,8 @@
 - :bug: fix pass value argument
 - :bug: fix invalid output format config
 - :bug: remove built in breakpoint
+- Merge headers and add <concepts>
+- Remove deps on merged headers
 
 ### 💼 Other
 
@@ -34,10 +37,14 @@
 
 - :fire: remove constexpr of lga::Angle
 - Split to multi headers
+- :bug: fix spell mistake
 
 ### 📚 Documentation
 
 - :memo: update dependencies
+- Add lovely doc in Makefile
+- :bulb: add doxygen comment
+- :memo: add more doxygen document
 
 ### ⚡ Performance
 
@@ -66,6 +73,7 @@
 - :see_no_evil: ignore more log file
 - Try to fix github linguist
 - Ignore local dev folders
+- Remove reduant item
 ## [0.1.0] - 2026-02-05
 
 ### 🚀 Features

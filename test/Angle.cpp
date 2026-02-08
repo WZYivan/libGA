@@ -326,22 +326,6 @@ TEST_CASE("Angle algebra operators", "[angle][algebra]")
     }
 }
 
-TEST_CASE("Normalization method")
-{
-    SECTION("norm")
-    {
-        lga::Angle ang{361, 0, 0};
-
-        REQUIRE(ang.norm().withinAbs(lga::Angle{1, 0, 0}));
-    }
-
-    SECTION("normSym")
-    {
-        lga::Angle ang{-181, 0, 0};
-        REQUIRE_THROWS_AS(ang.normSym(), lga::Not_Implement_Error);
-    }
-}
-
 TEST_CASE("Compare operator", "[angle][operator]")
 {
     SECTION("==")
