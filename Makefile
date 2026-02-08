@@ -109,7 +109,7 @@ $(LGA_LIB_OBJ_DIR)/%.o : $(LGA_INCLUDE_DIR)/lga/impl/%.cpp
 	$(CXX) -c $< -o $@ $(LGA_LIB_DEF)
 
 test-exe:  $(LGA_TEST_OBJ) $(LGA_TEST_EXE)
-# 	$(RM) $(LGA_TEST_OBJ_DIR)
+
 
 $(LGA_TEST_EXE_DIR)/%: $(LGA_TEST_OBJ_DIR)/%.o | $(LGA_TEST_EXE_DIR)
 	$(CXX) $< -o $@ $(LGA_TEST_LINK)

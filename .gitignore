@@ -19,3 +19,9 @@ log.*
 *.log.*
 
 tmp
+
+latex/*
+html/*
+Doxyfile
+
+draft.cpp

@@ -5,29 +5,67 @@
 - Add function to deal with float-point precesion
 - :sparkles: add frame and algorithms for offical work
 - Add global config, default construtor and ostream output for lga::Angle
+- Add config reset function
+- Add format function
+- :sparkles: add more infomation for *Adjust function
+- Add standard function for lga::Angle
+- :sparkles: add closed traverse adjust
+- Add angle fmt as json array
+- :sparkles: add utils for boost
+- Add global concepts
+- Add json array format convert function
 
 ### 🐛 Bug Fixes
 
 - :bookmark: update version macros
 - :bug: fix pass value argument
+- :bug: fix invalid output format config
+- :bug: remove built in breakpoint
 
 ### 💼 Other
 
 - Update auto mkdir
 - Update Debug build configure
+- :bug: update deps dir to global/customized install dir
+- Add deps boost_json
+- :construction_worker: update lib target and custom 3rd party deps
+
+### 🚜 Refactor
+
+- :fire: remove constexpr of lga::Angle
+- Split to multi headers
 
 ### 📚 Documentation
 
 - :memo: update dependencies
 
+### ⚡ Performance
+
+- Remove unnecessary loop
+
+### 🎨 Styling
+
+- Update style of function call
+- Add candidate (e.g. mm, km) of DataFrame field
+
 ### 🧪 Testing
 
 - :white_check_mark: add test for closed and attached route of elevation adjustment
 - Add breakpoint macro
+- Add test of hmdf::DataFrame output lga::Angle
+- :white_check_mark: updata multi return of *Adjust
+- Test closed traverse adjust
+- :white_check_mark: update more test data for closed traverse adjust
 
 ### ⚙️ Miscellaneous Tasks
 
 - :see_no_evil: update ignore local tmp files
+- Test git remote
+- :see_no_evil: add ignore to log file
+- Ignore tmp
+- :see_no_evil: ignore more log file
+- Try to fix github linguist
+- Ignore local dev folders
 ## [0.1.0] - 2026-02-05
 
 ### 🚀 Features
