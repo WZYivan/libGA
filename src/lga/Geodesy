@@ -1,3 +1,14 @@
+/**
+ * @file Geodesy
+ * @author WZYivan (2270060975@qq.com)
+ * @brief Algorithms in geodesy
+ * @version 0.1
+ * @date 2026-02-09
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_geodesy
 #define M_libga_geodesy
 
@@ -5,318 +16,413 @@
 #include <lga/Angle>
 #include <lga/Math>
 
-M_libga_begin
-
+namespace lga
+{
     namespace config
-{
-    struct Geodesy
     {
-        struct
-        {
-            double threshold = 1e-5;
-        } bessel_formula_solve; // -> bessel
 
-        struct
+        struct Geodesy
         {
-            double threshold = 1e-5;
-        } gauss_lemma_solve;
+            struct
+            {
+                /**
+                 * @brief threshold during iteration of `bessel_formula_solve.inverse`
+                 * @see lga::bessel_formula_solve
+                 */
+                double threshold = 1e-5;
+            }
+            /**
+             * @brief configuration of `bessel_formula_solve`
+             * @see lga::bessel_formula_solve
+             */
+            bessel_formula_solve;
 
-        struct
+            struct
+            {
+                /**
+                 * @brief threshold during iteration of `gauss_lemma_solve.forward`
+                 * @see lga::gauss_lemma_solve
+                 */
+                double threshold = 1e-5;
+            }
+            /**
+             * @brief configuration of `gauss_lemma_solve`
+             * @see lga::gauss_lemma_solve
+             */
+            gauss_lemma_solve;
+
+            struct
+            {
+                /**
+                 * @brief threshold during iteration of `meridianArcBottom`
+                 * @see meridianArcBottom
+                 */
+                double threshold = 1e-5;
+            }
+            /**
+             * @brief configuration of `meridianArcBottom`
+             * @see meridianArcBottom
+             */
+            meridian_arc_bottom;
+        };
+
+#if !(M_libga_with_impl)
+        /**
+         * @brief configurations for geodetic algorithms
+         *
+         */
+        extern Geodesy geodesy;
+#endif
+    }
+
+    namespace param
+    {
+        struct Geodesy
         {
-            double threshold = 1e-5;
-        } meridian_arc_bottom;
+            struct
+            {
+                double three = 3.0;
+                double six = 6.0;
+            } gauss_project_interval;
+        };
+#if !(M_libga_with_impl)
+        /**
+         * @brief predefined parameters for geodetic algorithms
+         *
+         */
+        extern const Geodesy geodesy;
+#endif
+    }
+
+#if !(M_libga_with_impl)
+    extern const double
+        /**
+         * @brief constant converting rad to degree
+         *
+         */
+        rho0,
+        /**
+         * @brief constant converting rad to minute
+         *
+         */
+        rho1,
+        /**
+         * @brief constant converting rad to seconds
+         *
+         */
+        rho2;
+#endif
+
+    /** @cond */
+    class Latitude_Longitude_Base
+    {
+    private:
+        double m_rad;
+
+    public:
+        virtual ~Latitude_Longitude_Base() = default;
+        Latitude_Longitude_Base(double p_rad) : m_rad(p_rad)
+        {
+        }
+
+        double sin() const noexcept;
+        double cos() const noexcept;
+        double tan() const noexcept;
+        double csc() const noexcept;
+        double sec() const noexcept;
+        double cot() const noexcept;
+
+        double rad() const noexcept;
+        double &rad() noexcept;
+
+        static Latitude_Longitude_Base fromAngle(const Angle &);
+        Angle toAngle() const noexcept;
+
+        std::string toString(std::string_view p_fmt = "") const noexcept;
+    };
+    /** @endcond */
+
+    /**
+     * @brief geodetic latitude
+     *
+     */
+    class Latitude : public Latitude_Longitude_Base
+    {
+    public:
+        Latitude &validate();
+        ~Latitude() = default;
+        explicit Latitude(double p_rad) : Latitude_Longitude_Base(p_rad)
+        {
+            validate();
+        }
+    };
+
+    /**
+     * @brief geodetic longitude
+     *
+     */
+    class Longitude : public Latitude_Longitude_Base
+    {
+    public:
+        Longitude &validate();
+        ~Longitude() = default;
+        explicit Longitude(double p_rad) : Latitude_Longitude_Base(p_rad)
+        {
+            validate();
+        }
+    };
+
+    /**
+     * @brief parameters to describe geometric attributes of an ellipsoid
+     *
+     */
+    struct Ellipsoid_Geometry_Property
+    {
+        double a, b, c, alpha, e1_2, e2_2;
+    };
+
+    /**
+     * @brief linearization coefficients to calculate principle curvature radii
+     *
+     */
+    struct Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient
+    {
+        double m0, m2, m4, m6, m8, n0, n2, n4, n6, n8;
+    };
+
+    /**
+     * @brief linearization coefficients to calculate quarter of the length meridian
+     *
+     */
+    struct Ellipsoid_Quarter_Arc_Linearization_Coefficient
+    {
+        double a0, a2, a4, a6;
+    };
+
+    /**
+     * @brief predefined adjustment model of meridian arc length
+     *
+     */
+    struct Ellipsoid_Quarter_Arc_Length_Adjust_Function : public Unary_Function
+    {
+        Sin_Function sin_fn;            ///< @private
+        Double_Gaussian_Function dg_fn; ///< @private
+        Cubic_Spline_Function cs_fn;    ///< @private
+
+        double operator()(double) const override;
+    };
+
+    /**
+     * @brief contains all constants to describe an ellipsoid
+     *
+     */
+    struct Ellipsoid_Property
+    {
+        Ellipsoid_Geometry_Property geometry;
+        Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient principle_curvature_radius_coeff;
+        Ellipsoid_Quarter_Arc_Linearization_Coefficient
+            quarter_arc_coeff;
+        Ellipsoid_Quarter_Arc_Length_Adjust_Function
+            quarter_arc_length_adjust_fn;
+    };
+
+    using Ellipsoid = Ellipsoid_Property;
+
+    /**
+     * @brief constants defined by both latitude and ellipsoid
+     *
+     */
+    struct Ellipsoid_Geometry_Latitude_Aux
+    {
+        Latitude b;
+        double t, nu_2, w, v;
+
+        Ellipsoid_Geometry_Latitude_Aux(
+            const Latitude &p_lat,
+            const Ellipsoid &p_ellipsoid);
     };
 
 #if !(M_libga_with_impl)
-    extern Geodesy geodesy;
+    extern const Ellipsoid krassovsky, ie1975, wgs84, cgcs2000;
 #endif
-}
 
-namespace param
-{
-    struct Geodesy
+    struct Ellipsoid_Principle_Curvature_Radius
     {
-        struct
-        {
-            double three = 3.0;
-            double six = 6.0;
-        } gauss_project_interval;
+        double m, n;
     };
-#if !(M_libga_with_impl)
-    extern const Geodesy geodesy;
-#endif
-}
 
-#if !(M_libga_with_impl)
-extern const double rho0,
-    rho1, rho2;
-#endif
-
-class Latitude_Longitude_Base
-{
-private:
-    double m_rad;
-
-public:
-    virtual ~Latitude_Longitude_Base() = default;
-    Latitude_Longitude_Base(double p_rad) : m_rad(p_rad)
-    {
-    }
-
-    double sin() const noexcept;
-    double cos() const noexcept;
-    double tan() const noexcept;
-    double csc() const noexcept;
-    double sec() const noexcept;
-    double cot() const noexcept;
-
-    double rad() const noexcept;
-    double &rad() noexcept;
-
-    static Latitude_Longitude_Base fromAngle(const Angle &);
-    Angle toAngle() const noexcept;
-
-    std::string toString(std::string_view p_fmt = "") const noexcept;
-};
-
-class Latitude : public Latitude_Longitude_Base
-{
-public:
-    Latitude &validate();
-    ~Latitude() = default;
-    explicit Latitude(double p_rad) : Latitude_Longitude_Base(p_rad)
-    {
-        validate();
-    }
-};
-class Longitude : public Latitude_Longitude_Base
-{
-public:
-    Longitude &validate();
-    ~Longitude() = default;
-    explicit Longitude(double p_rad) : Latitude_Longitude_Base(p_rad)
-    {
-        validate();
-    }
-};
-
-struct Ellipsoid_Geometry_Property
-{
-    double a, b, c, alpha, e1_2, e2_2;
-};
-
-struct Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient // -> Linearization
-{
-    double m0, m2, m4, m6, m8, n0, n2, n4, n6, n8;
-};
-
-struct Ellipsoid_Quarter_Arc_Linearization_Coefficient
-{
-    double a0, a2, a4, a6;
-};
-
-struct Ellipsoid_Quarter_Arc_Length_Adjust_Function : public Unary_Function
-{
-    Sin_Function sin_fn;
-    Double_Gaussian_Function dg_fn;
-    Cubic_Spline_Function cs_fn;
-
-    double operator()(double) const override;
-};
-
-struct Ellipsoid_Property
-{
-    Ellipsoid_Geometry_Property geometry;
-    Ellipsoid_Principle_Curvature_Radius_Linearization_Coefficient principle_curvature_radius_coeff;
-    Ellipsoid_Quarter_Arc_Linearization_Coefficient
-        quarter_arc_coeff;
-    Ellipsoid_Quarter_Arc_Length_Adjust_Function
-        quarter_arc_length_adjust_fn;
-};
-
-using Ellipsoid = Ellipsoid_Property;
-
-struct Ellipsoid_Geometry_Latitude_Aux
-{
-    Latitude b;
-    double t, nu_2, w, v;
-
-    Ellipsoid_Geometry_Latitude_Aux(
+    Ellipsoid_Principle_Curvature_Radius principleCurvatureRadius(
         const Latitude &p_lat,
         const Ellipsoid &p_ellipsoid);
-};
+    double meanCurvatureRadius(const Ellipsoid_Principle_Curvature_Radius &);
 
-#if !(M_libga_with_impl)
-extern const Ellipsoid krassovsky, ie1975, wgs84, cgcs2000; // Krassovsky
-#endif
+    double meridianArcLength(const Latitude &p_lat, const Ellipsoid &);
+    Latitude meridianArcBottom(double p_len, const Ellipsoid &);
 
-struct Ellipsoid_Principle_Curvature_Radius
-{
-    double m, n;
-};
+    struct Geodetic_Inverse_Solve_Result
+    {
+        Angle forward, backward;
+        double s;
+    };
 
-Ellipsoid_Principle_Curvature_Radius principleCurvatureRadius(
-    const Latitude &p_lat,
-    const Ellipsoid &p_ellipsoid);
-double meanCurvatureRadius(const Ellipsoid_Principle_Curvature_Radius &);
+    struct Geodetic_Forward_Solve_Result
+    {
+        Latitude lat;
+        Longitude lon;
+        Angle backward;
+    };
 
-double meridianArcLength(const Latitude &p_lat, const Ellipsoid &);
-Latitude meridianArcBottom(double p_len, const Ellipsoid &);
+    struct Geodetic_Solver
+    {
+        std::function<
+            Geodetic_Forward_Solve_Result(
+                const Latitude &,
+                const Longitude &,
+                double,
+                const Angle &,
+                const Ellipsoid &)>
+            forward; ///< @private
+        std::function<
+            Geodetic_Inverse_Solve_Result(
+                const Latitude &,
+                const Longitude &,
+                const Latitude &,
+                const Longitude &,
+                const Ellipsoid &)>
+            inverse; ///< @private
 
-struct Geodetic_Inverse_Solve_Result
-{
-    Angle forward, backward;
-    double s;
-};
-
-struct Geodetic_Forward_Solve_Result
-{
-    Latitude lat;
-    Longitude lon;
-    Angle backward;
-};
-
-struct Geodetic_Solver
-{
-    std::function<
-        Geodetic_Forward_Solve_Result(
+        /**
+         * @brief forward solve
+         *
+         * @return Geodetic_Forward_Solve_Result
+         */
+        Geodetic_Forward_Solve_Result
+        operator()(
             const Latitude &,
             const Longitude &,
             double,
             const Angle &,
-            const Ellipsoid &)>
-        forward;
-    std::function<
-        Geodetic_Inverse_Solve_Result(
+            const Ellipsoid &) const;
+
+        /**
+         * @brief inverse solve
+         *
+         * @return Geodetic_Inverse_Solve_Result
+         */
+        Geodetic_Inverse_Solve_Result
+        operator()(
             const Latitude &,
             const Longitude &,
             const Latitude &,
             const Longitude &,
-            const Ellipsoid &)>
-        inverse;
-
-    Geodetic_Forward_Solve_Result
-    operator()(
-        const Latitude &,
-        const Longitude &,
-        double,
-        const Angle &,
-        const Ellipsoid &) const;
-
-    Geodetic_Inverse_Solve_Result
-    operator()(
-        const Latitude &,
-        const Longitude &,
-        const Latitude &,
-        const Longitude &,
-        const Ellipsoid &) const;
-};
+            const Ellipsoid &) const;
+    };
 
 #if !(M_libga_with_impl)
-extern const Geodetic_Solver gauss_lemma_solve, bessel_formula_solve;
+    extern const Geodetic_Solver gauss_lemma_solve, bessel_formula_solve;
 #endif
 
-struct Geodetic_Coordinate
-{
-    Latitude lat;
-    Longitude lon;
-};
+    struct Geodetic_Coordinate
+    {
+        Latitude lat;
+        Longitude lon;
+    };
 
-struct Gauss_Project_Coordinate
-{
-    double interval;
-    double x, y;
-    int zone;
-};
+    struct Gauss_Project_Coordinate
+    {
+        double interval;
+        double x, y;
+        int zone;
+    };
 
-struct Gauss_Project_Direction_Correction
-{
-    Angle forward, backward;
-};
+    struct Gauss_Project_Direction_Correction
+    {
+        Angle forward, backward;
+    };
 
-struct Gauss_Projector
-{
-    int
-    zone(
-        const Longitude &,
-        double p_interval) const;
-    double
-    zoneY(
-        const Gauss_Project_Coordinate &p_gc) const noexcept;
-    Longitude
-    centerMeridian(
-        int p_zone,
-        double p_interval) const;
-    Longitude
-    centerMeridian(
-        const Longitude &,
-        double p_interval) const;
-    Gauss_Project_Coordinate
-    forward(
-        const Geodetic_Coordinate &,
-        double p_interval,
-        const Ellipsoid &,
-        int p_zone = -1) const;
-    Geodetic_Coordinate
-    inverse(
-        const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const;
+    struct Gauss_Projector
+    {
+        int
+        zone(
+            const Longitude &,
+            double p_interval) const;
+        double
+        zoneY(
+            const Gauss_Project_Coordinate &p_gc) const noexcept;
+        Longitude
+        centerMeridian(
+            int p_zone,
+            double p_interval) const;
+        Longitude
+        centerMeridian(
+            const Longitude &,
+            double p_interval) const;
+        Gauss_Project_Coordinate
+        forward(
+            const Geodetic_Coordinate &,
+            double p_interval,
+            const Ellipsoid &,
+            int p_zone = -1) const;
+        Geodetic_Coordinate
+        inverse(
+            const Gauss_Project_Coordinate &,
+            const Ellipsoid &) const;
 
-    Gauss_Project_Coordinate
-    operator()(
-        const Geodetic_Coordinate &,
-        double p_interval,
-        const Ellipsoid &,
-        int p_zone = -1) const;
+        Gauss_Project_Coordinate
+        operator()(
+            const Geodetic_Coordinate &,
+            double p_interval,
+            const Ellipsoid &,
+            int p_zone = -1) const;
 
-    Geodetic_Coordinate
-    operator()(
-        const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const;
+        Geodetic_Coordinate
+        operator()(
+            const Gauss_Project_Coordinate &,
+            const Ellipsoid &) const;
 
-    Gauss_Project_Coordinate
-    modifyZone(
-        const Gauss_Project_Coordinate &,
-        int p_tar_zone,
-        const Ellipsoid &) const;
-    Angle
-    meridianConvergence(
-        const Geodetic_Coordinate &,
-        double,
-        const Ellipsoid &) const;
-    Angle
-    meridianConvergence(
-        const Gauss_Project_Coordinate &,
-        double,
-        const Ellipsoid &) const;
-    Gauss_Project_Direction_Correction
-    directionCorrection(
-        const Gauss_Project_Coordinate &,
-        const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const;
-    double
-    distanceCorrection(
-        double p_s,
-        const Geodetic_Coordinate &,
-        const Geodetic_Coordinate &,
-        double p_interval,
-        const Ellipsoid &) const;
-    double
-    stretch(
-        const Geodetic_Coordinate &,
-        double,
-        const Ellipsoid &) const noexcept;
-    double
-    stretch(
-        const Gauss_Project_Coordinate &,
-        const Ellipsoid &) const noexcept;
-};
+        Gauss_Project_Coordinate
+        modifyZone(
+            const Gauss_Project_Coordinate &,
+            int p_tar_zone,
+            const Ellipsoid &) const;
+        Angle
+        meridianConvergence(
+            const Geodetic_Coordinate &,
+            double,
+            const Ellipsoid &) const;
+        Angle
+        meridianConvergence(
+            const Gauss_Project_Coordinate &,
+            double,
+            const Ellipsoid &) const;
+        Gauss_Project_Direction_Correction
+        directionCorrection(
+            const Gauss_Project_Coordinate &,
+            const Gauss_Project_Coordinate &,
+            const Ellipsoid &) const;
+        double
+        distanceCorrection(
+            double p_s,
+            const Geodetic_Coordinate &,
+            const Geodetic_Coordinate &,
+            double p_interval,
+            const Ellipsoid &) const;
+        double
+        stretch(
+            const Geodetic_Coordinate &,
+            double,
+            const Ellipsoid &) const noexcept;
+        double
+        stretch(
+            const Gauss_Project_Coordinate &,
+            const Ellipsoid &) const noexcept;
+    };
 
 #if !(M_libga_with_impl)
-extern const Gauss_Projector gauss_project;
+    extern const Gauss_Projector gauss_project;
 #endif
 
-M_libga_end
+}
 
 #if (M_libga_with_impl)
 #include <lga/impl/GeodesyBase.cpp>
