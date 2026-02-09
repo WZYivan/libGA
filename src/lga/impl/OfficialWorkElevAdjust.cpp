@@ -7,7 +7,7 @@
 
 M_libga_begin
 
-    Adjust_Result
+    Adjust_Frame_Result
     closedElevAdjust(
         std::vector<double> &p_distances,
         std::vector<double> &p_diff,
@@ -32,7 +32,7 @@ M_libga_begin
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
 
-    Adjust_Result result{};
+    Adjust_Frame_Result result{};
     DataFrame &df = result.frame;
     df.load_index(std::move(indices));
     df.load_column("distance", std::move(p_distances));
@@ -121,7 +121,7 @@ M_libga_begin
     return result;
 }
 
-Adjust_Result
+Adjust_Frame_Result
 attachedElevAdjust(
     std::vector<double> &p_distances,
     std::vector<double> &p_diff,
@@ -147,7 +147,7 @@ attachedElevAdjust(
     DataFrameColumnIndices indices(size + 1);
     std::iota(indices.begin(), indices.end(), 0);
 
-    Adjust_Result result{};
+    Adjust_Frame_Result result{};
     DataFrame &df = result.frame;
     df.load_index(std::move(indices));
     df.load_column("distance", std::move(p_distances));

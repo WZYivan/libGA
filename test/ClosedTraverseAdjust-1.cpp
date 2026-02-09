@@ -11,7 +11,7 @@ int main()
         105.22, 80.18, 129.34, 78.16};
     lga::Angle angle_beg{125, 30, 0};
     double x_beg = 500, y_beg = 600;
-    lga::Adjust_Result result =
+    lga::Adjust_Frame_Result result =
         lga::closedTraverseAdjust(
             left_angle,
             distance,

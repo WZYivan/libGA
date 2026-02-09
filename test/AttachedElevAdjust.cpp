@@ -9,7 +9,7 @@ int main()
         distance = {1.6, 2.1, 1.7, 2.0},
         diff = {2.331, 2.813, -2.224, 1.430};
 
-    lga::Adjust_Result result = lga::attachedElevAdjust(
+    lga::Adjust_Frame_Result result = lga::attachedElevAdjust(
         distance,
         diff,
         45.286,

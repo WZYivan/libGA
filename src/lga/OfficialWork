@@ -1,3 +1,14 @@
+/**
+ * @file OfficialWork
+ * @author WZYivan (2270060975@qq.com)
+ * @brief Algorithms for official work adjustment
+ * @version 0.1
+ * @date 2026-02-09
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_official_work
 #define M_libga_official_work
 
@@ -6,95 +17,200 @@
 
 #include <DataFrame/DataFrame.h>
 
+#include <boost/graph/adjacency_list.hpp>
+
 #include <lga/Base>
 #include <lga/Math>
 #include <lga/Angle>
 
-M_libga_begin
+namespace lga
+{
 
     using DataFrame = hmdf::StdDataFrame<size_t>;
-using DataFrameColumnIndices = std::vector<size_t>;
-using StrDataFrame = hmdf::StdDataFrame<std::string>;
-using StrDataFrameColumnIndices = std::vector<std::string>;
+    using DataFrameColumnIndices = std::vector<size_t>;
+    using StrDataFrame = hmdf::StdDataFrame<std::string>;
+    using StrDataFrameColumnIndices = std::vector<std::string>;
 
-struct Adjust_Result
-{
-    DataFrame frame;
-    DataFrame info_frame;
-};
-
-namespace param
-{
-    struct Official_Work
+    /**
+     * @brief result of single route, contains adjustment dataframe and information
+     *
+     */
+    struct Adjust_Frame_Result
     {
-        struct
+        DataFrame frame;
+        DataFrame info_frame;
+    };
+
+    namespace param
+    {
+        struct Official_Work
         {
             struct
             {
-                std::function<double(double)>
-                    forty_sqrt_l = [](double p_l) -> double
+                struct
                 {
-                    return 40 * std::sqrt(p_l);
-                };
-            } elev;
+                    std::function<double(double)>
+                        /**
+                         * @brief `40 * sqrt(l)`, where l is sum of distance
+                         */
+                        forty_sqrt_l = [](double p_l) -> double
+                    {
+                        return 40 * std::sqrt(p_l);
+                    };
+                }
+                /**
+                 * @brief elevation adjustment
+                 */
+                elev;
 
-            struct
-            {
-                std::function<double(double, double)>
-                    sixty_sqrt_n = [](double p_n, double p_l) -> double
+                struct
                 {
-                    return 60 * std::sqrt(p_n);
-                };
-            } traverse;
-        } tolerance;
-    };
+                    std::function<double(double, double)>
+                        /**
+                         * @brief `60 * sqrt(n)`, where n is observation number
+                         */
+                        sixty_sqrt_n = [](double p_n, double p_l) -> double
+                    {
+                        return 60 * std::sqrt(p_n);
+                    };
+                }
+                /**
+                 * @brief traverse adjustment
+                 */
+                traverse;
+            } tolerance;
+        };
 #if !(M_libga_with_impl)
-    extern const Official_Work official_work;
+        /**
+         * @brief configurations of algorithms for official work adjustment
+         */
+        extern const Official_Work official_work;
 #endif
+    }
+
+    /** @cond */
+    namespace internal
+    {
+        /**
+         * @brief refine sum of given range to target
+         *
+         * @param p_vec
+         * @param p_sum
+         * @param p_target
+         * @param p_precision
+         */
+        void adjustSumToTarget(
+            std::vector<double> &p_vec,
+            double p_sum,
+            double p_target,
+            int p_precision);
+
+        /**
+         * @brief automatically invoke given tolerance calculation
+         *
+         * @param p_vec
+         * @param p_fn
+         * @return double
+         */
+        double calcTolerance(
+            const std::vector<double> &p_vec,
+            std::function<double(double)> p_fn);
+    }
+    /** @endcond */
+
+    /**
+     * @brief elevation adjustment of closed route
+     *
+     * @param p_distances
+     * @param p_diff
+     * @param p_beg
+     * @param p_correction_precision
+     * @param p_tolerance_fn
+     * @return Adjust_Frame_Result
+     */
+    Adjust_Frame_Result
+    closedElevAdjust(
+        std::vector<double> &p_distances,
+        std::vector<double> &p_diff,
+        double p_beg,
+        int p_correction_precision = 3,
+        std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
+
+    /**
+     * @brief elevation adjustment of attached route
+     *
+     * @param p_distances
+     * @param p_diff
+     * @param p_beg
+     * @param p_end
+     * @param p_correction_precision
+     * @param p_tolerance_fn
+     * @return Adjust_Frame_Result
+     */
+    Adjust_Frame_Result
+    attachedElevAdjust(
+        std::vector<double> &p_distances,
+        std::vector<double> &p_diff,
+        double p_beg,
+        double p_end,
+        int p_correction_precision = 3,
+        std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
+
+    /**
+     * @brief traverse adjustment of closed route
+     *
+     * @param p_left_angle
+     * @param p_distance
+     * @param p_angle_beg azimuth begin
+     * @param p_x_beg
+     * @param p_y_beg
+     * @param p_angle_correction_precision
+     * @param p_distance_correction_precision
+     * @param p_tolerance_fn
+     * @return Adjust_Frame_Result
+     */
+    Adjust_Frame_Result
+    closedTraverseAdjust(
+        std::vector<Angle> &p_left_angle,
+        std::vector<double> &p_distance,
+        const Angle &p_angle_beg,
+        double p_x_beg,
+        double p_y_beg,
+        int p_angle_correction_precision = 0,
+        int p_distance_correction_precision = 2,
+        std::function<double(double, double)> p_tolerance_fn = param::official_work.tolerance.traverse.sixty_sqrt_n);
+
+    /**
+     * @brief traverse adjustment of connecting route
+     *
+     * @param p_left_angle
+     * @param p_distance
+     * @param p_angle_beg azimuth begin
+     * @param p_angle_end azimuth end
+     * @param p_x_beg
+     * @param p_y_beg
+     * @param p_x_end
+     * @param p_y_end
+     * @param p_angle_correction_precision
+     * @param p_distance_correction_precision
+     * @param p_tolerance_fn
+     * @return Adjust_Frame_Result
+     */
+    Adjust_Frame_Result
+    connectingTraverseAdjust(
+        std::vector<Angle> &p_left_angle,
+        std::vector<double> &p_distance,
+        const Angle &p_angle_beg,
+        const Angle &p_angle_end,
+        double p_x_beg,
+        double p_y_beg,
+        double p_x_end,
+        double p_y_end,
+        int p_angle_correction_precision = 0,
+        int p_distance_correction_precision = 2,
+        std::function<double(double, double)> p_tolerance_fn = param::official_work.tolerance.traverse.sixty_sqrt_n);
+
 }
-
-namespace internal
-{
-    void adjustSumToTarget(
-        std::vector<double> &p_vec,
-        double p_sum,
-        double p_target,
-        int p_precision);
-
-    double calcTolerance(
-        const std::vector<double> &p_vec,
-        std::function<double(double)> p_fn);
-}
-
-Adjust_Result
-closedElevAdjust(
-    std::vector<double> &p_distances,
-    std::vector<double> &p_diff,
-    double p_beg,
-    int p_correction_precision = 3,
-    std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
-
-Adjust_Result
-attachedElevAdjust(
-    std::vector<double> &p_distances,
-    std::vector<double> &p_diff,
-    double p_beg,
-    double p_end,
-    int p_correction_precision = 3,
-    std::function<double(double)> p_tolerance_fn = param::official_work.tolerance.elev.forty_sqrt_l);
-
-Adjust_Result
-closedTraverseAdjust(
-    std::vector<Angle> &p_left_angle,
-    std::vector<double> &p_distance,
-    const Angle &p_angle_beg,
-    double p_x_beg,
-    double p_y_beg,
-    int p_angle_correction_precision = 0,
-    int p_distance_correction_precision = 2,
-    std::function<double(double, double)> p_tolerance_fn = param::official_work.tolerance.traverse.sixty_sqrt_n);
-
-M_libga_end
 
 #if (M_libga_with_impl)
 #include <lga/impl/OfficialWorkUtils.cpp>
