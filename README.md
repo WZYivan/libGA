@@ -38,7 +38,7 @@ lga::Longitude L1(lga::deg2rad(35.826758)); // 35°49'36.330"E
 lga::Geodetic_Forward_Solve_Result result = lga::bessel_formula_solve(
     B1, L1,                    // Starting point
     44797.2826,               // Distance (meters)
-    lga::Angle::fromDMS(44, 12, 13.664), // Azimuth
+    lga::Angle:{44, 12, 13.664}, // Azimuth
     lga::krassovsky             // Reference ellipsoid
 );
 ```
@@ -130,21 +130,26 @@ The library includes predefined reference ellipsoids:
 
 ## Dependencies
 
-- eigen 5.0.0
+- eigen 3.5.0
 - DataFrame 3.7.0
     - oneTBB/tbb 2022.3.0
+- boost 1.90.0
+    - json
 - catch2 (optional for test)
+
+*VERSIONS are just what I'm using in dev*
 
 ## Install
 
-By default, it only builds dynamic library (shared object):
 ```bash
-make lib
+make shared-lib
+make static-lib
 ```
-For extra static lib:
+or you can get help document using
 ```bash
-make lib STATIC_LIB=1
+make help
 ```
+
 
 ## Usage
 
