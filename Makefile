@@ -189,7 +189,7 @@ help:
 	@echo "BUILD_TYPE$(NC) = Debug|Release"
 	@echo "$(RED)"
 	@echo "THIRD_PARTY_ROOT$(NC) = $(BLUE)MY_LOCAL_INSTALL$(NC)"
-	@echo "================> where to get 3rd party libraries,$(RED)this must be set coz MY_LOCAL_INSTALL is my local folder$(NC)"
+	@echo "================> where to get 3rd party libraries, $(RED)this must be set coz MY_LOCAL_INSTALL is my local folder$(NC)"
 	@echo "$(BLUE)"
 	@echo "<LIB_NAME>_ROOT$(NC)"
 	@echo "==============> where to get specified library [BOOST|DATAFRAME|ONETBB|EIGEN3|CATCH2]"
@@ -205,3 +205,5 @@ doxygen-doc:
 clean-dev:
 	$(RM) draft.cpp
 	@find -type f -name "*log*" -exec echo "remove {}" \; -exec $(RM) {} \;
+
+dev: test-exe | shared-lib
