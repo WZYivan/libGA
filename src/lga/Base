@@ -2,11 +2,7 @@
  * @file Base
  * @author WZYivan (227006975@qq.com)
  *
- * @brief Basic header of libGA, defines macros, namespaces, concepts and enumerable constants. \n
- * You can define several macros to modify internal behaviour:
- * 1. `LGA_DEBUG`: enable debug output
- * 2. `LGA_HEADER_ONLY`: include all implement file to compile without library file
- * 3. `LGA_HIGH_PRECISION`: enable internal high precision patch
+ * @brief Basic header of libGA, defines macros, namespaces, concepts and enumerable constants.
  *
  * @version 0.1.0
  * @date 2026-02-08

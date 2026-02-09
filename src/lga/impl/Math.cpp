@@ -39,18 +39,18 @@ double round465(double p_val)
     }
 }
 
-double cut(double p_val, int p_precesion)
+double cut(double p_val, int p_precision)
 {
-    if (p_precesion < 0)
+    if (p_precision < 0)
     {
         return p_val;
     }
 
-    if (p_precesion == 0)
+    if (p_precision == 0)
     {
         return round465(p_val);
     }
-    double scale = std::pow(10, p_precesion);
+    double scale = std::pow(10, p_precision);
     return round465(p_val * scale) / scale;
 }
 

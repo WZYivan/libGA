@@ -1,3 +1,14 @@
+/**
+ * @file Photogrammetry
+ * @author WZYivan (2270060975@qq.com)
+ * @brief algorithms in photogrammetry
+ * @version 0.1
+ * @date 2026-02-09
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_photogrammetry
 #define M_libga_photogrammetry
 
@@ -6,122 +17,449 @@
 
 #include <lga/Linalg>
 
-M_libga_begin
+namespace lga
+{
 
+    /**
+     * @brief interior orientation elements
+     *
+     */
     struct Interior
-{
-    double x, y, f, m;
-};
+    {
+        double
+            /**
+             * @brief x coordinate of center `S` in image plane
+             *
+             */
+            x,
+            /**
+             * @brief y coordinate of center `S` in image plane
+             *
+             */
+            y,
+            /**
+             * @brief focus distance
+             *
+             */
+            f,
+            /**
+             * @brief scale of image
+             *
+             */
+            m;
+    };
 
-struct Exterior
-{
-    double x, y, z, phi, omega, kappa;
+    /**
+     * @brief exterior orientation elements
+     *
+     */
+    struct Exterior
+    {
+        double
+            /**
+             * @brief x coordinate of center `S` in image space coordinate system
+             *
+             */
+            x,
+            /**
+             * @brief y coordinate of center `S` in image space coordinate system
+             *
+             */
+            y,
+            /**
+             * @brief z coordinate of center `S` in image space coordinate system
+             *
+             */
+            z,
+            /**
+             * @brief pitch(y)
+             *
+             */
+            phi,
+            /**
+             * @brief roll(x)
+             *
+             */
+            omega,
+            /**
+             * @brief yaw(z)
+             *
+             */
+            kappa;
 
-    static Exterior makeFrom(const Interior &p_in, const Matrix &p_obj);
-};
+        /**
+         * @brief initialize exterior elements using interior elements and object coordinates
+         *
+         * @param p_in interior elements
+         * @param p_obj object coordinates
+         * @return Exterior
+         */
+        static Exterior makeFrom(const Interior &p_in, const Matrix &p_obj);
+    };
 
-Matrix ex2yxzRotation(const Exterior &);
+    /**
+     * @brief calculate rotation matrix from exterior elements in order of (y, x, z).
+     *
+     * @see Exterior
+     * @param exterior
+     * @return Matrix
+     */
+    Matrix ex2yxzRotation(const Exterior &);
 
-Matrix xy2mat21(double, double);
-Matrix xyz2mat31(double, double, double);
-Matrix xy2mat12(double, double);
-Matrix xyz2mat13(double, double, double);
+    /**
+     * @brief construct Matrix [ [x], [y] ]
+     *
+     * @return Matrix
+     */
+    Matrix xy2mat21(double, double);
 
-Matrix obj2aux(const Matrix &p_obj, const Exterior &p_ex);
-Matrix aux2isp(const Matrix &p_aux, const Matrix &p_rotate);
-Matrix aux2isp(const Matrix &p_aux, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
-Matrix isp2img(const Matrix &p_isp, const Interior &p_in);
+    /**
+     * @brief construct Matrix [ [x], [y], [z] ]
+     *
+     * @return Matrix
+     */
+    Matrix xyz2mat31(double, double, double);
 
-Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, const Matrix &p_rotate);
-Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
+    /**
+     * @brief construct Matrix [[x, y]]
+     *
+     * @return Matrix
+     */
+    Matrix xy2mat12(double, double);
 
-Matrix isp2aux(const Matrix &p_isp, const Matrix &p_rotate);
-Matrix isp2aux(const Matrix &p_isp, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
+    /**
+     * @brief construct Matrix [[x, y, z]]
+     *
+     * @return Matrix
+     */
+    Matrix xyz2mat13(double, double, double);
 
-Matrix aux2obj(const Matrix &p_aux, const Exterior &p_ex);
+    /**
+     * @brief transform object coordinates to image auxilary coordinates
+     *
+     * @param p_obj
+     * @param p_ex
+     * @return Matrix
+     */
+    Matrix obj2aux(const Matrix &p_obj, const Exterior &p_ex);
 
-struct Collinearity_Condition_Equation_Coefficient
-{
-    double a11, a12, a13, a14, a15, a16,
-        a21, a22, a23, a24, a25, a26;
+    /**
+     * @brief transform image auxilary coordinates to image space coordinates
+     *
+     * @param p_aux
+     * @param p_rotate
+     * @return Matrix
+     */
+    Matrix aux2isp(const Matrix &p_aux, const Matrix &p_rotate);
 
-    Matrix toMatrix26() const noexcept;
-    Matrix toMatrix29() const noexcept;
-};
+    /**
+     * @brief transform image auxilary coordinates to image space coordinates
+     *
+     * @param p_aux
+     * @param p_ex
+     * @param p_calc_rotate function transforming `Exterior` to rotation matrix
+     * @return Matrix
+     */
+    Matrix aux2isp(const Matrix &p_aux, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
 
-struct Collinearity_Condition_Equation_Linearization_Param
-{
-    double x, y, f, h, kappa, omega, z;
-    const Matrix &rotate;
-};
+    /**
+     * @brief transform image space coordinates to image plane coordinates
+     *
+     * @param p_isp
+     * @param p_in
+     * @return Matrix
+     */
+    Matrix isp2img(const Matrix &p_isp, const Interior &p_in);
 
-Collinearity_Condition_Equation_Coefficient
-cceSimplifyAll(
-    Collinearity_Condition_Equation_Linearization_Param p);
-Collinearity_Condition_Equation_Coefficient
-cceKappaOnly(
-    Collinearity_Condition_Equation_Linearization_Param p);
-Collinearity_Condition_Equation_Coefficient
-cceSimplifyNone(
-    Collinearity_Condition_Equation_Linearization_Param p);
+    /**
+     * @brief transform object coordinates to image plane coordinates
+     *
+     * @param p_obj
+     * @param p_ex
+     * @param p_in
+     * @param p_rotate
+     * @return Matrix
+     */
+    Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, const Matrix &p_rotate);
 
-using Collinearity_Condition_Equation_Coefficient_Solver =
-    std::function<Collinearity_Condition_Equation_Coefficient(Collinearity_Condition_Equation_Linearization_Param)>;
+    /**
+     * @brief transform object coordinates to image plane coordinates
+     *
+     * @param p_obj
+     * @param p_ex
+     * @param p_in
+     * @param p_calc_rotate function transforming `Exterior` to rotation matrix
+     * @return Matrix
+     */
+    Matrix obj2img(const Matrix &p_obj, const Exterior &p_ex, const Interior &p_in, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
 
-struct Space_Resection_Result
-{
-    Exterior exterior;
-    Matrix rotate, sigma, image;
-    double rmse;
-    Iterative_Algo_Info info;
-};
+    /**
+     * @brief transform image space coordinates to image auxilary coordinate
+     *
+     * @param p_isp
+     * @param p_rotate
+     * @return Matrix
+     */
+    Matrix isp2aux(const Matrix &p_isp, const Matrix &p_rotate);
 
-Space_Resection_Result
-spaceResection(
-    const Interior &p_in,
-    const Matrix &p_img,
-    const Matrix &p_obj,
-    size_t p_max_loop = 50,
-    double p_threshold = 1e-5,
-    Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
-    Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+    /**
+     * @brief transform image space coordinates to image auxilary coordinate
+     *
+     * @param p_isp
+     * @param p_ex
+     * @param p_calc_rotate function transforming `Exterior` to rotation matrix
+     * @return Matrix
+     */
+    Matrix isp2aux(const Matrix &p_isp, const Exterior &p_ex, std::function<Matrix(const Exterior &)> p_calc_rotate = ex2yxzRotation);
 
-struct Image_Meta_Data
-{
-    Exterior exterior;
-    Interior interior;
-};
+    /**
+     * @brief transform image auxilary coordinate to image space coordinates
+     *
+     * @param p_aux
+     * @param p_ex
+     * @return Matrix
+     */
+    Matrix aux2obj(const Matrix &p_aux, const Exterior &p_ex);
 
-Matrix
-spaceIntersection(
-    const Image_Meta_Data &p_left_meta,
-    const Matrix &p_left_img,
-    const Image_Meta_Data &p_right_meta,
-    const Matrix &p_right_img);
+    /**
+     * @brief linearization coefficients of collinearity condition equation
+     *
+     */
+    struct Collinearity_Condition_Equation_Coefficient
+    {
+        double a11, a12, a13, a14, a15, a16,
+            a21, a22, a23, a24, a25, a26;
 
-struct Space_Intersection_Ols_Result
-{
-    Matrix coordinate;
-    Matrix sigma;
-    double rmse;
-    Iterative_Algo_Info info;
-};
+        /**
+         * @brief construct matrix \n
+         * [ \n
+         * [a11, a12, a13, a14, a15, a16], \n
+         * [a21, a22, a23, a24, a25, a26] \n
+         * ]
+         *
+         * @return Matrix
+         */
+        Matrix toMatrix26() const noexcept;
 
-struct Space_Intersection_Ols_Block
-{
-    Image_Meta_Data meta;
-    Matrix image;
-};
+        /**
+         * @brief construct matrix \n
+         * [ \n
+         * [a11, a12, a13, a14, a15, a16, -a11, -a12, -a13], \n
+         * [a21, a22, a23, a24, a25, a26, -a21, -a22, -a23] \n
+         * ]
+         *
+         * @return Matrix
+         */
+        Matrix toMatrix29() const noexcept;
+    };
 
-Space_Intersection_Ols_Result
-spaceIntersection(
-    std::span<const Space_Intersection_Ols_Block> p_list,
-    size_t p_max_loop = 50,
-    double p_threshold = 1e-5,
-    Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
-    Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+    /**
+     * @brief necessary parameters to calculate `Collinearity_Condition_Equation_Coefficient`
+     *
+     * @see Collinearity_Condition_Equation_Coefficient
+     *
+     */
+    struct Collinearity_Condition_Equation_Linearization_Param
+    {
+        double x, y, f, h, kappa, omega, z;
+        const Matrix &rotate;
+    };
 
-M_libga_end
+    /**
+     * @brief simplify all angles in collinearity condition equation
+     *
+     * @param p
+     * @return Collinearity_Condition_Equation_Coefficient
+     */
+    Collinearity_Condition_Equation_Coefficient
+    cceSimplifyAll(
+        Collinearity_Condition_Equation_Linearization_Param p);
+    /**
+     * @brief simplify all angles except `kappa` in collinearity condition equation
+     *
+     * @see Exterior
+     * @param p
+     * @return Collinearity_Condition_Equation_Coefficient
+     */
+    Collinearity_Condition_Equation_Coefficient
+    cceKappaOnly(
+        Collinearity_Condition_Equation_Linearization_Param p);
+
+    /**
+     * @brief collinearity condition equation without simplification
+     *
+     * @param p
+     * @return Collinearity_Condition_Equation_Coefficient
+     */
+    Collinearity_Condition_Equation_Coefficient
+    cceSimplifyNone(
+        Collinearity_Condition_Equation_Linearization_Param p);
+
+    /**
+     * @brief handler to calculate `Collinearity_Condition_Equation_Coefficient`
+     *
+     * @see Collinearity_Condition_Equation_Coefficient
+     *
+     */
+    using Collinearity_Condition_Equation_Coefficient_Solver =
+        std::function<Collinearity_Condition_Equation_Coefficient(Collinearity_Condition_Equation_Linearization_Param)>;
+
+    /**
+     * @brief result of algorithm space resection
+     * @see spaceResection
+     *
+     */
+    struct Space_Resection_Result
+    {
+        /**
+         * @brief adjusted exterior elements
+         *
+         */
+        Exterior exterior;
+        Matrix
+            /**
+             * @brief adjusted rotation matrix
+             *
+             */
+            rotate,
+            /**
+             * @brief error matrix
+             *
+             */
+            sigma,
+            /**
+             * @brief adjusted image coordinates
+             *
+             */
+            image;
+        /**
+         * @brief root mean square error
+         *
+         */
+        double rmse;
+        /**
+         * @brief infomation indicates if algorithm runs normally
+         *
+         */
+        Iterative_Algo_Info info;
+    };
+
+    /**
+     * @brief based on control points to calculate exterior elements of an image
+     *
+     * @param p_in
+     * @param p_img
+     * @param p_obj
+     * @param p_max_loop
+     * @param p_threshold
+     * @param p_cce_solver
+     * @param p_inverse_solver
+     * @return Space_Resection_Result
+     */
+    Space_Resection_Result
+    spaceResection(
+        const Interior &p_in,
+        const Matrix &p_img,
+        const Matrix &p_obj,
+        size_t p_max_loop = 50,
+        double p_threshold = 1e-5,
+        Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
+        Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+
+    /**
+     * @brief description of image's position and orientation in object coordinate system
+     * @see spaceIntersection
+     *
+     */
+    struct Image_Meta_Data
+    {
+        Exterior exterior;
+        Interior interior;
+    };
+
+    /**
+     * @brief based on pair of image coordinates, calculate its object coordinate
+     *
+     * @param p_left_meta
+     * @param p_left_img
+     * @param p_right_meta
+     * @param p_right_img
+     * @return Matrix
+     */
+    Matrix
+    spaceIntersection(
+        const Image_Meta_Data &p_left_meta,
+        const Matrix &p_left_img,
+        const Image_Meta_Data &p_right_meta,
+        const Matrix &p_right_img);
+
+    /**
+     * @brief space intersection result using ols algorithm
+     *
+     */
+    struct Space_Intersection_Ols_Result
+    {
+        /**
+         * @brief adjusted object coordinates
+         *
+         */
+        Matrix coordinate;
+        /**
+         * @brief error matrix
+         *
+         */
+        Matrix sigma;
+        /**
+         * @brief root mean square error
+         *
+         */
+        double rmse;
+        /**
+         * @brief infomation indicates if algorithm runs normally
+         *
+         */
+        Iterative_Algo_Info info;
+    };
+
+    /**
+     * @brief basic adjustment block of space intersection (ols), an image with its description and points'
+     * coordinates
+     *
+     * @see Image_Meta_Data
+     */
+    struct Space_Intersection_Ols_Block
+    {
+        /**
+         * @brief description
+         *
+         */
+        Image_Meta_Data meta;
+        /**
+         * @brief points image coordinates
+         *
+         */
+        Matrix image;
+    };
+
+    /**
+     * @brief space intersection ols version using ols algorithm
+     *
+     * @see spaceIntersectoin
+     * @param p_list
+     * @param p_max_loop
+     * @param p_threshold
+     * @param p_cce_solver
+     * @param p_inverse_solver
+     * @return Space_Intersection_Ols_Result
+     */
+    Space_Intersection_Ols_Result
+    spaceIntersection(
+        std::span<const Space_Intersection_Ols_Block> p_list,
+        size_t p_max_loop = 50,
+        double p_threshold = 1e-5,
+        Collinearity_Condition_Equation_Coefficient_Solver p_cce_solver = cceSimplifyNone,
+        Matrix_Inverse_Solver p_inverse_solver = choleskyInverse);
+}
 
 #if (M_libga_with_impl)
 #include <lga/impl/Photogrammetry.cpp>

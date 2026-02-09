@@ -1,3 +1,14 @@
+/**
+ * @file Math
+ * @author WZYivan (2270060975@qq.com)
+ * @brief utilities for mathematics
+ * @version 0.1
+ * @date 2026-02-09
+ *
+ * @copyright Copyright (c) 2026
+ *
+ */
+
 #ifndef M_libga_math
 #define M_libga_math
 
@@ -6,50 +17,90 @@
 
 #include <lga/Base>
 
-M_libga_begin
-
-    bool
-    eqApprox(double p_x, double p_y, double p_threshold = 1e-5);
-
-double zeroOr(double p_x, double p_threshold = 1e-5);
-
-double round465(double);
-
-double cut(double, int p_precision);
-
-struct Unary_Function
+namespace lga
 {
-    virtual double operator()(double) const { return 0.0; }
-};
 
-struct Sin_Function : public Unary_Function
-{
-    double a{0.0}, b{0.0}, c{0.0};
+    /**
+     * @brief if floating point number is approximately equals to another
+     *
+     * @param p_x
+     * @param p_y
+     * @param p_threshold
+     * @return true
+     * @return false
+     */
+    bool eqApprox(double p_x, double p_y, double p_threshold = 1e-5);
 
-    double operator()(double) const override;
-};
+    /**
+     * @brief if a floating point number is `eqApprox` to 0, then return 0
+     *
+     * @see eqApprox
+     * @param p_x
+     * @param p_threshold
+     * @return double
+     */
+    double zeroOr(double p_x, double p_threshold = 1e-5);
 
-struct Double_Gaussian_Function : public Unary_Function
-{
-    double
-        offset{0.0},
-        amp1{0.0},
-        center1{0.0},
-        sigma1{0.0},
-        amp2{0.0},
-        center2{0.0},
-        sigma2{0.0};
-    double operator()(double) const override;
-};
+    /**
+     * @brief based on rule of `floating point part: ( < 0.4) -> 0; ( > 0.6) -> 1; (0.5) -> 1 if odd(int part) else 0`
+     *
+     * @return double
+     */
+    double round465(double);
 
-struct Cubic_Spline_Function : public Unary_Function
-{
-    std::vector<double> x, y, a, b, c, d;
-    double threshold;
-    double operator()(double) const override;
-};
+    /**
+     * @brief throw floating point part
+     *
+     * @param p_precision floating point place to be kept
+     * @return double
+     */
+    double cut(double, int p_precision);
 
-M_libga_end
+    /**
+     * @brief functions invoked by one argument
+     *
+     */
+    struct Unary_Function
+    {
+        virtual double operator()(double) const { return 0.0; }
+    };
+
+    /**
+     * @brief `y = a * sin(2 * pi / b * x) + c`
+     *
+     */
+    struct Sin_Function : public Unary_Function
+    {
+        double a{0.0}, b{0.0}, c{0.0};
+
+        double operator()(double) const override;
+    };
+
+    /**
+     * @brief c + a1 * exp(((x - c1) / ( -2 * s1))^2) + a2 * exp(((x - c2) / ( -2 * s2))^2)
+     *
+     */
+    struct Double_Gaussian_Function : public Unary_Function
+    {
+        double
+            offset{0.0},
+            amp1{0.0},
+            center1{0.0},
+            sigma1{0.0},
+            amp2{0.0},
+            center2{0.0},
+            sigma2{0.0};
+        double operator()(double) const override;
+    };
+
+    struct Cubic_Spline_Function : public Unary_Function
+    {
+        std::vector<double> x, y, a, b, c, d;
+        double threshold;
+        double operator()(double) const override;
+    };
+
+}
 
 #if (M_libga_with_impl)
 #include <lga/impl/Math.cpp>
