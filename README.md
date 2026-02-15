@@ -130,12 +130,13 @@ The library includes predefined reference ellipsoids:
 
 ## Dependencies
 
-- eigen 3.5.0
+- Eigen 3.5.0
 - DataFrame 3.7.0
     - oneTBB/tbb 2022.3.0
 - boost 1.90.0
     - json
 - catch2 (optional for test)
+- CGAL (TODO)
 
 *VERSIONS are just what I'm using in dev*
 

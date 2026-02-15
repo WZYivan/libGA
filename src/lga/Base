@@ -15,6 +15,7 @@
 #define M_libga_base
 
 #include <concepts>
+#include <iostream>
 
 #define LGA_MAJOR 0
 #define LGA_MINOR 1
