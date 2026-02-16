@@ -16,6 +16,7 @@
 
 #include <concepts>
 #include <iostream>
+#include <print>
 
 #define LGA_MAJOR 0
 #define LGA_MINOR 1
