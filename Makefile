@@ -12,21 +12,10 @@ OPTIMIZE ?= 2
 DEPS_LINK_TYPE ?= Dynamic
 CXX += $(COMPILER) -std=gnu++$(VERSION) -fPIC -Wno-interference-size -Wall
 
-ifeq ($(BUILD_TYPE), Debug)
-CXX += -g
-LGA_MACROS += -DLGA_DEBUG
-else ifeq ($(BUILD_TYPE), Release)
-CXX += -O$(OPTIMIZE)
-endif
-
 ## where to find dependence, this is my custom setting
 THIRD_PARTY_ROOT ?= /home/azusa/file/libs/install
 LGA_LIB_NAME := ga
 LGA_LINK := 
-
-ifeq ($(DEPS_LINK_TYPE), Dynamic)
-LGA_LINK += -Bdynamic
-endif
 
 LGA_HEADER_DIR := ./src
 LGA_SRC_DIR := ./src/lga/impl
@@ -47,6 +36,17 @@ LGA_TEST_SRC_FILES := $(wildcard $(LGA_TEST_SRC_DIR)/*.cpp)
 LGA_TEST_OBJ_FILES := $(addprefix $(LGA_TEST_OBJ_DIR)/, $(notdir $(LGA_TEST_SRC_FILES:.cpp=.o)))
 LGA_TEST_EXE_FILES := $(addprefix $(LGA_TEST_BIN_DIR)/, $(notdir $(LGA_TEST_SRC_FILES:.cpp=)))
 
+ifeq ($(BUILD_TYPE), Debug)
+CXX += -g
+LGA_MACROS += -DLGA_DEBUG
+else ifeq ($(BUILD_TYPE), Release)
+CXX += -O$(OPTIMIZE)
+endif
+
+ifeq ($(DEPS_LINK_TYPE), Dynamic)
+LGA_LINK += -Bdynamic
+endif
+
 ## Eigen3: `https://libeigen.gitlab.io/`
 EIGEN3_ROOT   ?= $(THIRD_PARTY_ROOT)
 ## DataFrame: `https://github.com/hosseinmoein/DataFrame`
@@ -63,9 +63,6 @@ $(foreach lib, $(DEPS),\
         $(eval LGA_RUNTIME += -Wl,-rpath=$($(lib)_ROOT)/lib)\
     ,)\
 )
-
-
-
 
 DIRS := $(LGA_LIB_DIR) $(LGA_OBJ_DIR) $(LGA_TEST_BIN_DIR) $(LGA_TEST_OBJ_DIR)
 $(shell mkdir -p $(DIRS))
