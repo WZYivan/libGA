@@ -10,7 +10,7 @@ BUILD_TYPE ?= Debug
 OPTIMIZE ?= 2
 ## how to link dependence: `Dynamic` or `Static`
 DEPS_LINK_TYPE ?= Dynamic
-CXX += $(COMPILER) -std=gnu++$(VERSION) -fPIC -Wno-interference-size -Wno-strict-aliasing -Wall
+CXX += $(COMPILER) -std=gnu++$(VERSION) -fPIC -Wall
 
 ## where to find dependence, this is my custom setting
 THIRD_PARTY_ROOT ?= /home/azusa/file/libs/install
@@ -21,7 +21,7 @@ LGA_HEADER_DIR := ./src
 LGA_SRC_DIR := ./src/lga/impl
 LGA_TEST_SRC_DIR := ./test
 LGA_MACROS := -DCATCH_CONFIG_MAIN
-LGA_INCLUDE := -I$(THIRD_PARTY_ROOT)/include -I$(LGA_HEADER_DIR)
+LGA_INCLUDE := -isystem $(THIRD_PARTY_ROOT)/include -I$(LGA_HEADER_DIR)
 LGA_LINK += -lDataFrame -ltbb -lboost_json -lCatch2Main -lCatch2 -L$(THIRD_PARTY_ROOT)/lib
 LGA_RUNTIME := -Wl,-rpath=$(THIRD_PARTY_ROOT)/lib
 LGA_SO_NAME := lib$(LGA_LIB_NAME).so
@@ -58,7 +58,7 @@ BOOST_ROOT    ?= $(THIRD_PARTY_ROOT)
 DEPS := EIGEN3 DATAFRAME ONETBB BOOST CATCH2
 $(foreach lib, $(DEPS),\
     $(if $(filter-out $(THIRD_PARTY_ROOT),$($(lib)_ROOT)),\
-        $(eval LGA_INCLUDE += -I$($(lib)_ROOT)/include)\
+        $(eval LGA_INCLUDE += -isystem $($(lib)_ROOT)/include)\
         $(eval LGA_LINK   += -L$($(lib)_ROOT)/lib)\
         $(eval LGA_RUNTIME += -Wl,-rpath=$($(lib)_ROOT)/lib)\
     ,)\
