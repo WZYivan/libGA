@@ -13,7 +13,7 @@
 - [Usage Examples](#usage-examples)
 - [Testing](#testing)
 - [Documentation](#documentation)
-- [License](#license)
+- [Apologize](#apologize)
 
 ## Features
 
@@ -92,7 +92,7 @@
 
 ### Prerequisites
 
-- C++23 compatible compiler (GCC 13+, Clang 16+)
+- C++23 compatible compiler (GCC 14+, others not sure)
 - CMake or Make
 - All dependencies installed
 
