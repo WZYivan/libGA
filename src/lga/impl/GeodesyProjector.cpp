@@ -161,7 +161,7 @@ Gauss_Projector::
     double tf = glc.t, nf2 = glc.nu_2;
     double tf2 = std::pow(tf, 2),
            tf4 = std::pow(tf, 4),
-           nf4 = std::pow(nf2, 2);
+           nf4 [[maybe_unused]] = std::pow(nf2, 2);
     double Nf3 = std::pow(Nf, 3),
            Nf5 = std::pow(Nf, 5);
     double cosBf = Bf.cos();

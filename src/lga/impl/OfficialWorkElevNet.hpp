@@ -1,6 +1,8 @@
 #ifndef M_libga_impl_elev_net
 #define M_libga_impl_elev_net
 
+#include <boost/pending/queue.hpp>
+
 #include <lga/OfficialWork>
 
 struct lga_elev_dif_obs_t

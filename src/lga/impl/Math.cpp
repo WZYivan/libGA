@@ -105,7 +105,7 @@ double Cubic_Spline_Function::operator()(double p_x) const
     //                  { return p_x < val; });
     // size_t idx = std::max(std::ptrdiff_t(0), std::distance(x.begin(), dest) - 1);
     size_t idx = 0;
-    for (int i = 0; i != a.size(); ++i)
+    for (std::size_t i = 0; i != a.size(); ++i)
     {
         if (p_x < x[i + 1])
         {

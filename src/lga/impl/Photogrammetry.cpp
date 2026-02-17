@@ -212,7 +212,7 @@ cceSimplifyNone(
     double
         x = p.x,
         y = p.y, z = p.z,
-        f = p.f, H = p.h,
+        f = p.f, H [[maybe_unused]] = p.h,
         k = p.kappa, w = p.omega;
     const Matrix &rotate = p.rotate;
 
@@ -289,7 +289,7 @@ spaceResection(
             dxy = p_img - img_calc;
 
         Matrix residual(p_img.rows() * 2, 1);
-        for (auto li = 0uz; li != dxy.rows(); ++li)
+        for (long int li = 0; li != dxy.rows(); ++li)
         {
             residual(2 * li) = dxy(li, 0);
             residual(2 * li + 1) = dxy(li, 1);
@@ -303,7 +303,7 @@ spaceResection(
                 .kappa = exterior.kappa,
                 .omega = exterior.omega,
                 .rotate = rotate};
-        for (auto pi = 0uz; pi != img_calc.rows(); ++pi)
+        for (long int pi = 0; pi != img_calc.rows(); ++pi)
         {
             cce_param.x = img_calc(pi, 0);
             cce_param.y = img_calc(pi, 1);
@@ -461,7 +461,7 @@ spaceIntersection(
     {
         bool is_converged = true;
 
-        for (size_t row = 0uz; row != coordinate.rows(); ++row)
+        for (long int row = 0; row != coordinate.rows(); ++row)
         {
 
             Matrix coeff(2 * count, 3), residual(2 * count, 1);
@@ -503,7 +503,7 @@ spaceIntersection(
                     });
 
                 Matrix l(dxy.rows() * 2, 1);
-                for (auto li = 0uz; li != dxy.rows(); ++li)
+                for (auto li = 0; li != dxy.rows(); ++li)
                 {
                     l(2 * li) = dxy(li, 0);
                     l(2 * li + 1) = dxy(li, 1);

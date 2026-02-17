@@ -546,7 +546,7 @@ gaussLemmaInverse(
         U = coeff_solver.u(dLs, dBs),
         V = coeff_solver.v(dLs, dBs),
         dAs = coeff_solver.deltaAs(dLs, dBs),
-        tanA = U / V;
+        tanA [[maybe_unused]] = U / V;
 
     double
         c = std::abs(V / U),

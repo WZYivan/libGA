@@ -4,9 +4,9 @@
  * @brief utils for libGA and Boost
  * @version 0.1
  * @date 2026-02-08
- * 
+ *
  * @copyright Copyright (c) 2026
- * 
+ *
  */
 
 #ifndef M_libga_boost_utils
@@ -14,79 +14,298 @@
 
 #include <boost/json.hpp>
 
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/visitors.hpp>
+
 #include <lga/Base>
 #include <lga/Angle>
 
-namespace lga{
-
-/**
- * @brief enforce to convert `boost::json::value` to `double`
- * 
- * @param p_bst_j_val 
- * @return double `quiet_NaN` if failed
- */
-double enforce2double(const boost::json::value &p_bst_j_val);
-
-/**
- * @brief enforce to convert `boost::json::array` to `lga::Angle`
- * 
- * @param p_bst_j_arr 
- * @return Angle `Angle(0.0)` if failed
- */
-Angle enforce2angle(const boost::json::array &p_bst_j_arr);
-
-/**
- * @brief remove of replace invalid token in string to fit constraints of boost::json,
- * for example, remove "+" and replace "nan" by "NaN" or "null"
- * 
- * @param p_str 
- * @param p_opt based on `boost::json::parse_options` to handle
- */
-void preprocessJsonStr(
-    std::string &p_str,
-    const boost::json::parse_options &p_opt);
-
-namespace internal
+namespace lga
 {
-    template <typename Iter>
+
+    /**
+     * @brief enforce to convert `boost::json::value` to `double`
+     *
+     * @param p_bst_j_val
+     * @return double `quiet_NaN` if failed
+     */
+    double enforce2double(const boost::json::value &p_bst_j_val);
+
+    /**
+     * @brief enforce to convert `boost::json::array` to `lga::Angle`
+     *
+     * @param p_bst_j_arr
+     * @return Angle `Angle(0.0)` if failed
+     */
+    Angle enforce2angle(const boost::json::array &p_bst_j_arr);
+
+    /**
+     * @brief remove of replace invalid token in string to fit constraints of boost::json,
+     * for example, remove "+" and replace "nan" by "NaN" or "null"
+     *
+     * @param p_str
+     * @param p_opt based on `boost::json::parse_options` to handle
+     */
+    void preprocessJsonStr(
+        std::string &p_str,
+        const boost::json::parse_options &p_opt);
+
+    namespace internal
+    {
+        template <typename Iter>
+        inline std::string
+        format2jsonArray(
+            Iter p_begin,
+            Iter p_end,
+            std::function<std::string(Iter)> p_conv); ///< @private
+
+        template <typename Iter>
+        inline std::string
+        format2jsonArray(Iter p_begin, Iter p_end); ///< @private
+    }
+
+    /**
+     * @brief convert a iterable range to [<item1>, <item2>, ... ]
+     *
+     * @tparam Range
+     * @param p_range
+     * @return std::string
+     */
+    template <typename Range>
+    inline std::string
+    format2jsonArray(Range p_range);
+
+    /**
+     * @brief convert a iterable range to [<item1>, <item2>, ... ], but convert each item
+     * using `p_conv`
+     *
+     * @tparam Range
+     * @tparam Conv_Fn
+     * @param p_range
+     * @param p_conv
+     * @return std::string
+     */
+    template <typename Range, typename Conv_Fn>
     inline std::string
     format2jsonArray(
-        Iter p_begin,
-        Iter p_end,
-        std::function<std::string(Iter)> p_conv); ///< @private
+        Range p_range,
+        Conv_Fn p_conv);
 
-    template <typename Iter>
-    inline std::string
-    format2jsonArray(Iter p_begin, Iter p_end); ///< @private
-}
+    /**
+     * @brief Extract property tag and its type, mainly through template specialization
+     *
+     * @tparam Net
+     */
+    template <typename Net>
+    struct Net_Property_Traits
+    {
+        using Vertex_Property_Tag_Type = boost::vertex_bundle_t;
+        using Edge_Property_Tag_Type = boost::edge_bundle_t;
+        static const Vertex_Property_Tag_Type Vertex_Property_Tag = boost::vertex_bundle;
+        static const Edge_Property_Tag_Type Edge_Property_Tag = boost::edge_bundle;
+    };
 
-/**
- * @brief convert a iterable range to [<item1>, <item2>, ... ]
- * 
- * @tparam Range 
- * @param p_range 
- * @return std::string 
- */
-template <typename Range>
-inline std::string
-format2jsonArray(Range p_range);
+    /**
+     * @brief Extact descriptor and property map of vertex and edge
+     *
+     * @tparam Net
+     */
+    template <typename Net>
+    struct Net_Basic_Traits : public Net_Property_Traits<Net>
+    {
+        using GT = typename boost::graph_traits<Net>;
+        using NPT = Net_Property_Traits<Net>;
 
-/**
- * @brief convert a iterable range to [<item1>, <item2>, ... ], but convert each item 
- * using `p_conv`
- * 
- * @tparam Range 
- * @tparam Conv_Fn 
- * @param p_range 
- * @param p_conv 
- * @return std::string 
- */
-template <typename Range, typename Conv_Fn>
-inline std::string
-format2jsonArray(
-    Range p_range,
-    Conv_Fn p_conv);
+        using Vertex_Descriptor = typename GT::vertex_descriptor;
+        using Edge_Descriptor = typename GT::edge_descriptor;
 
+        using Vertex_Property_Map = typename boost::property_map<Net, typename NPT::Vertex_Property_Tag_Type>;
+        using Vertex_Property = typename Vertex_Property_Map::type::value_type;
+        using Edge_Property_Map = typename boost::property_map<Net, typename NPT::Edge_Property_Tag_Type>;
+        using Edge_Property = typename Edge_Property_Map::type::value_type;
+    };
+
+    /**
+     * @brief predefined bidirectional index map of vertex and edge
+     *
+     * @tparam VD vertex descriptor
+     * @tparam ED edge descriptor
+     * @tparam IT index type
+     */
+    template <typename VD, typename ED, typename IT>
+    struct Net_Index_Traits
+    {
+        using Index_Type = IT;
+        using Vertex_Index_Map_Ds = std::map<VD, Index_Type>;
+        using Vertex_Index_Map = boost::associative_property_map<Vertex_Index_Map_Ds>;
+        using Edge_Index_Map_Ds = std::map<ED, Index_Type>;
+        using Edge_Index_Map = boost::associative_property_map<Edge_Index_Map_Ds>;
+        using Index_Vertex_Map_Ds = std::map<Index_Type, VD>;
+        using Index_Vertex_Map = boost::associative_property_map<Index_Vertex_Map_Ds>;
+        using Index_Edge_Map_Ds = std::map<Index_Type, ED>;
+        using Index_Edge_Map = boost::associative_property_map<Index_Edge_Map_Ds>;
+    };
+
+    /**
+     * @brief defined how to display vertex and edge property
+     * @see Bfs_Display_Visitor
+     * @tparam VP
+     * @tparam EP
+     */
+    template <typename VP, typename EP>
+    struct Net_Property_Display_Traits
+    {
+        static std::string vpFmt(const VP &)
+        {
+            return "";
+        }
+        static std::string epFmt(const EP &)
+        {
+            return "";
+        }
+    };
+
+    /**
+     * @brief combining all traits of net together
+     *
+     * @tparam Net
+     * @tparam IT
+     */
+    template <typename Net, typename IT = std::size_t>
+    struct Net_Traits
+        : public Net_Basic_Traits<Net>,
+          public Net_Index_Traits<
+              typename Net_Basic_Traits<Net>::Vertex_Descriptor,
+              typename Net_Basic_Traits<Net>::Edge_Descriptor,
+              IT>,
+          public Net_Property_Display_Traits<
+              typename Net_Basic_Traits<Net>::Vertex_Property,
+              typename Net_Basic_Traits<Net>::Edge_Property>
+    {
+        using NBT = Net_Basic_Traits<Net>;
+        using NIT = Net_Index_Traits<typename NBT::Vertex_Descriptor, typename NBT::Edge_Descriptor, IT>;
+        using NPDT = Net_Property_Display_Traits<typename NBT::Vertex_Property, typename NBT::Edge_Property>;
+    };
+
+    /**
+     * @brief manage bidirectional map from index to vertex/edge descriptor
+     *
+     * @tparam Net
+     */
+    template <typename Net>
+    class Net_Indices_Manager
+    {
+
+    public:
+        using NT = Net_Traits<Net>;
+        using NIT = typename NT::NIT;
+
+        ~Net_Indices_Manager() = default;
+        Net_Indices_Manager()
+        {
+            m_vim = boost::make_assoc_property_map(vim_ds);
+            m_eim = boost::make_assoc_property_map(eim_ds);
+            m_ivm = boost::make_assoc_property_map(ivm_ds);
+            m_iem = boost::make_assoc_property_map(iem_ds);
+        };
+
+        inline typename NIT::Vertex_Index_Map &vim() { return m_vim; }
+        inline typename NIT::Edge_Index_Map &eim() { return m_eim; }
+        inline typename NIT::Index_Vertex_Map &ivm() { return m_ivm; }
+        inline typename NIT::Index_Edge_Map &iem() { return m_iem; }
+
+        inline const typename NIT::Vertex_Index_Map &vim() const { return m_vim; }
+        inline const typename NIT::Edge_Index_Map &eim() const { return m_eim; }
+        inline const typename NIT::Index_Vertex_Map &ivm() const { return m_ivm; }
+        inline const typename NIT::Index_Edge_Map &iem() const { return m_iem; }
+
+        inline void putvi(typename NT::Vertex_Descriptor vd, typename NIT::Index_Type i)
+        {
+            boost::put(vim(), vd, i);
+            boost::put(ivm(), i, vd);
+        }
+
+        inline void putiv(typename NIT::Index_Type i, typename NT::Vertex_Descriptor vd)
+        {
+            this->putvi(vd, i);
+        }
+
+        inline void putei(typename NT::Edge_Descriptor ed, typename NIT::Index_Type i)
+        {
+            boost::put(eim(), ed, i);
+            boost::put(iem(), i, ed);
+        }
+
+        inline void putie(typename NIT::Index_Type i, typename NT::Edge_Descriptor ed)
+        {
+            this->putei(ed, i);
+        }
+
+        inline typename NIT::Index_Type getvi(typename NT::Vertex_Descriptor vd) const
+        {
+            return boost::get(vim(), vd);
+        }
+
+        inline typename NT::Vertex_Descriptor getiv(typename NIT::Index_Type i) const
+        {
+            return boost::get(ivm(), i);
+        }
+
+        inline typename NIT::Index_Type getei(typename NT::Edge_Descriptor ed) const
+        {
+            return boost::get(eim(), ed);
+        }
+
+        inline typename NT::Edge_Descriptor getie(typename NIT::Index_Type i) const
+        {
+            return boost::get(iem(), i);
+        }
+
+    private:
+        typename NIT::Vertex_Index_Map_Ds vim_ds;
+        typename NIT::Edge_Index_Map_Ds eim_ds;
+        typename NIT::Index_Vertex_Map_Ds ivm_ds;
+        typename NIT::Index_Edge_Map_Ds iem_ds;
+
+        typename NIT::Vertex_Index_Map m_vim;
+        typename NIT::Edge_Index_Map m_eim;
+        typename NIT::Index_Vertex_Map m_ivm;
+        typename NIT::Index_Edge_Map m_iem;
+    };
+
+    /**
+     * @brief display all vertex/edge property in bfs order
+     *
+     * @tparam Net
+     * @tparam Stream
+     */
+    template <typename Net, typename Stream>
+    class Bfs_Display_Visitor : public boost::bfs_visitor<>
+    {
+    public:
+        using N = Net;
+        using NT = Net_Traits<N>;
+
+        template <class Edge, class Graph>
+        void examine_edge(Edge e, Graph &g)
+        {
+            m_s << NT::epFmt(boost::get(NT::Edge_Property_Tag, g, e));
+        }
+
+        template <class Vertex, class Graph>
+        void examine_vertex(Vertex u, Graph &g)
+        {
+            m_s << NT::vpFmt(boost::get(NT::Vertex_Property_Tag, g, u));
+        }
+
+        Bfs_Display_Visitor(Stream &s) : m_s(s) {}
+        ~Bfs_Display_Visitor() = default;
+
+    private:
+        Stream &m_s;
+    };
 }
 
 #include <lga/impl/BoostUtils.hpp>

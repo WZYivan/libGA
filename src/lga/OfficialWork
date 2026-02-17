@@ -17,24 +17,17 @@
 
 #include <DataFrame/DataFrame.h>
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/breadth_first_search.hpp>
-#include <boost/graph/visitors.hpp>
-#include <boost/pending/queue.hpp>
-
 #include <lga/Base>
 #include <lga/Math>
 #include <lga/Angle>
 #include <lga/Linalg>
+#include <lga/BoostUtils>
 
 namespace lga
 {
 
     using DataFrame = hmdf::StdDataFrame<size_t>;
     using DataFrameColumnIndices = std::vector<size_t>;
-    using StrDataFrame = hmdf::StdDataFrame<std::string>;
-    using StrDataFrameColumnIndices = std::vector<std::string>;
 
     /**
      * @brief result of single route, contains adjustment dataframe and information
@@ -226,188 +219,6 @@ namespace lga
     bool frameAssert(Route_Type, const Adjust_Frame_Result &);
 
     /**
-     * @brief Extract property tag and its type, mainly through template specialization
-     *
-     * @tparam Net
-     */
-    template <typename Net>
-    struct Net_Property_Traits
-    {
-        using Vertex_Property_Tag_Type = boost::vertex_bundle_t;
-        using Edge_Property_Tag_Type = boost::edge_bundle_t;
-        static const Vertex_Property_Tag_Type Vertex_Property_Tag = boost::vertex_bundle;
-        static const Edge_Property_Tag_Type Edge_Property_Tag = boost::edge_bundle;
-    };
-
-    /**
-     * @brief Extact descriptor and property map of vertex and edge
-     *
-     * @tparam Net
-     */
-    template <typename Net>
-    struct Net_Basic_Traits : public Net_Property_Traits<Net>
-    {
-        using GT = typename boost::graph_traits<Net>;
-        using NPT = Net_Property_Traits<Net>;
-
-        using Vertex_Descriptor = typename GT::vertex_descriptor;
-        using Edge_Descriptor = typename GT::edge_descriptor;
-
-        using Vertex_Property_Map = typename boost::property_map<Net, typename NPT::Vertex_Property_Tag_Type>;
-        using Vertex_Property = typename Vertex_Property_Map::type::value_type;
-        using Edge_Property_Map = typename boost::property_map<Net, typename NPT::Edge_Property_Tag_Type>;
-        using Edge_Property = typename Edge_Property_Map::type::value_type;
-    };
-
-    /**
-     * @brief predefined bidirectional index map of vertex and edge
-     *
-     * @tparam VD vertex descriptor
-     * @tparam ED edge descriptor
-     * @tparam IT index type
-     */
-    template <typename VD, typename ED, typename IT>
-    struct Net_Index_Traits
-    {
-        using Index_Type = IT;
-        using Vertex_Index_Map_Ds = std::map<VD, Index_Type>;
-        using Vertex_Index_Map = boost::associative_property_map<Vertex_Index_Map_Ds>;
-        using Edge_Index_Map_Ds = std::map<ED, Index_Type>;
-        using Edge_Index_Map = boost::associative_property_map<Edge_Index_Map_Ds>;
-        using Index_Vertex_Map_Ds = std::map<Index_Type, VD>;
-        using Index_Vertex_Map = boost::associative_property_map<Index_Vertex_Map_Ds>;
-        using Index_Edge_Map_Ds = std::map<Index_Type, ED>;
-        using Index_Edge_Map = boost::associative_property_map<Index_Edge_Map_Ds>;
-    };
-
-    /**
-     * @brief defined how to display vertex and edge property
-     * @see Bfs_Display_Visitor
-     * @tparam VP
-     * @tparam EP
-     */
-    template <typename VP, typename EP>
-    struct Net_Property_Display_Traits
-    {
-        static std::string vpFmt(const VP &)
-        {
-            return "";
-        }
-        static std::string epFmt(const EP &)
-        {
-            return "";
-        }
-    };
-
-    /**
-     * @brief combining all traits of net together
-     *
-     * @tparam Net
-     * @tparam IT
-     */
-    template <typename Net, typename IT = std::size_t>
-    struct Net_Traits
-        : public Net_Basic_Traits<Net>,
-          public Net_Index_Traits<
-              typename Net_Basic_Traits<Net>::Vertex_Descriptor,
-              typename Net_Basic_Traits<Net>::Edge_Descriptor,
-              IT>,
-          public Net_Property_Display_Traits<
-              typename Net_Basic_Traits<Net>::Vertex_Property,
-              typename Net_Basic_Traits<Net>::Edge_Property>
-    {
-        using NBT = Net_Basic_Traits<Net>;
-        using NIT = Net_Index_Traits<typename NBT::Vertex_Descriptor, typename NBT::Edge_Descriptor, IT>;
-        using NPDT = Net_Property_Display_Traits<typename NBT::Vertex_Property, typename NBT::Edge_Property>;
-    };
-
-    /**
-     * @brief manage bidirectional map from index to vertex/edge descriptor
-     *
-     * @tparam Net
-     */
-    template <typename Net>
-    class Net_Indices_Manager
-    {
-
-    public:
-        using NT = Net_Traits<Net>;
-        using NIT = typename NT::NIT;
-
-        ~Net_Indices_Manager() = default;
-        Net_Indices_Manager()
-        {
-            m_vim = boost::make_assoc_property_map(vim_ds);
-            m_eim = boost::make_assoc_property_map(eim_ds);
-            m_ivm = boost::make_assoc_property_map(ivm_ds);
-            m_iem = boost::make_assoc_property_map(iem_ds);
-        };
-
-        inline typename NIT::Vertex_Index_Map &vim() { return m_vim; }
-        inline typename NIT::Edge_Index_Map &eim() { return m_eim; }
-        inline typename NIT::Index_Vertex_Map &ivm() { return m_ivm; }
-        inline typename NIT::Index_Edge_Map &iem() { return m_iem; }
-
-        inline const typename NIT::Vertex_Index_Map &vim() const { return m_vim; }
-        inline const typename NIT::Edge_Index_Map &eim() const { return m_eim; }
-        inline const typename NIT::Index_Vertex_Map &ivm() const { return m_ivm; }
-        inline const typename NIT::Index_Edge_Map &iem() const { return m_iem; }
-
-        inline void putvi(typename NT::Vertex_Descriptor vd, typename NIT::Index_Type i)
-        {
-            boost::put(vim(), vd, i);
-            boost::put(ivm(), i, vd);
-        }
-
-        inline void putiv(typename NIT::Index_Type i, typename NT::Vertex_Descriptor vd)
-        {
-            this->putvi(vd, i);
-        }
-
-        inline void putei(typename NT::Edge_Descriptor ed, typename NIT::Index_Type i)
-        {
-            boost::put(eim(), ed, i);
-            boost::put(iem(), i, ed);
-        }
-
-        inline void putie(typename NIT::Index_Type i, typename NT::Edge_Descriptor ed)
-        {
-            this->putei(ed, i);
-        }
-
-        inline typename NIT::Index_Type getvi(typename NT::Vertex_Descriptor vd) const
-        {
-            return boost::get(vim(), vd);
-        }
-
-        inline typename NT::Vertex_Descriptor getiv(typename NIT::Index_Type i) const
-        {
-            return boost::get(ivm(), i);
-        }
-
-        inline typename NIT::Index_Type getei(typename NT::Edge_Descriptor ed) const
-        {
-            return boost::get(eim(), ed);
-        }
-
-        inline typename NT::Edge_Descriptor getie(typename NIT::Index_Type i) const
-        {
-            return boost::get(iem(), i);
-        }
-
-    private:
-        typename NIT::Vertex_Index_Map_Ds vim_ds;
-        typename NIT::Edge_Index_Map_Ds eim_ds;
-        typename NIT::Index_Vertex_Map_Ds ivm_ds;
-        typename NIT::Index_Edge_Map_Ds iem_ds;
-
-        typename NIT::Vertex_Index_Map m_vim;
-        typename NIT::Edge_Index_Map m_eim;
-        typename NIT::Index_Vertex_Map m_ivm;
-        typename NIT::Index_Edge_Map m_iem;
-    };
-
-    /**
      * @brief result of adjustment of a net
      *
      * @tparam Net
@@ -431,40 +242,8 @@ namespace lga
     template <typename Net>
     inline Adjust_Net_Result<Net> netAdjust(Net &p_net, double unit_w = 10.0)
     {
-        return {};
+        return {p_net};
     }
-
-    /**
-     * @brief display all vertex/edge property in bfs order
-     *
-     * @tparam Net
-     * @tparam Stream
-     */
-    template <typename Net, typename Stream>
-    class Bfs_Display_Visitor : public boost::bfs_visitor<>
-    {
-    public:
-        using N = Net;
-        using NT = Net_Traits<N>;
-
-        template <class Edge, class Graph>
-        void examine_edge(Edge e, Graph &g)
-        {
-            m_s << NT::epFmt(boost::get(NT::Edge_Property_Tag, g, e));
-        }
-
-        template <class Vertex, class Graph>
-        void examine_vertex(Vertex u, Graph &g)
-        {
-            m_s << NT::vpFmt(boost::get(NT::Vertex_Property_Tag, g, u));
-        }
-
-        Bfs_Display_Visitor(Stream &s) : m_s(s) {}
-        ~Bfs_Display_Visitor() = default;
-
-    private:
-        Stream &m_s;
-    };
 }
 
 #include <lga/impl/OfficialWorkElevNet.hpp>
