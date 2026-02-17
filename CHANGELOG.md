@@ -1,4 +1,4 @@
-## [unreleased]
+## [0.1.1] - 2026-02-17
 
 ### 🚀 Features
 
@@ -15,6 +15,9 @@
 - Add global concepts
 - Add json array format convert function
 - Add concept `Iter_Like`
+- Adjustment of connecting traverse
+- :sparkles: add elevation net adjustment algorithm
+- Add assertion to all singal route type
 
 ### 🐛 Bug Fixes
 
@@ -24,6 +27,7 @@
 - :bug: remove built in breakpoint
 - Merge headers and add <concepts>
 - Remove deps on merged headers
+- Remove invoking deleted function
 
 ### 💼 Other
 
@@ -32,12 +36,16 @@
 - :bug: update deps dir to global/customized install dir
 - Add deps boost_json
 - :construction_worker: update lib target and custom 3rd party deps
+- Add target 'dev'
+- Rewrite Makefile, add makehelp
+- Depress warning from 3rd party lib
 
 ### 🚜 Refactor
 
 - :fire: remove constexpr of lga::Angle
 - Split to multi headers
 - :bug: fix spell mistake
+- Depress warning
 
 ### 📚 Documentation
 
@@ -45,6 +53,11 @@
 - Add lovely doc in Makefile
 - :bulb: add doxygen comment
 - :memo: add more doxygen document
+- Doxygen comment in source files
+- Update Makefile targets
+- Add doxygen comment to Geodesy
+- :memo: update doc of OfficialWork
+- Update README.md and reuse it to doxygen
 
 ### ⚡ Performance
 
@@ -54,6 +67,7 @@
 
 - Update style of function call
 - Add candidate (e.g. mm, km) of DataFrame field
+- Move if-else together
 
 ### 🧪 Testing
 
@@ -63,6 +77,7 @@
 - :white_check_mark: updata multi return of *Adjust
 - Test closed traverse adjust
 - :white_check_mark: update more test data for closed traverse adjust
+- Update all test to catch2
 
 ### ⚙️ Miscellaneous Tasks
 
