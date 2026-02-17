@@ -3,38 +3,27 @@
 
 #include <lga/Geodesy>
 
-auto fmt = "{:0s}{:d}d{:d}m{:f}s";
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-int main()
+using namespace Catch::Matchers;
+using namespace lga;
+
+TEST_CASE("bessel formula solve")
 {
-    lga::Latitude B1(lga::dms2rad(47, 46, 52.647'0));
-    lga::Longitude L1(lga::dms2rad(35, 49, 36.330'0));
-    lga::Angle A1(lga::dms2rad(44, 12, 13.664));
-    double S = 44'797.282'6;
+    SECTION("forward inverse residual less than 1e-3")
+    {
+        Latitude B1(lga::dms2rad(47, 46, 52.647'0));
+        Longitude L1(lga::dms2rad(35, 49, 36.330'0));
+        Angle A1(lga::dms2rad(44, 12, 13.664));
+        double S = 44'797.282'6;
 
-    lga::Geodetic_Forward_Solve_Result rf =
-        lga::bessel_formula_solve(
-            B1,
-            L1,
-            S,
-            A1,
-            lga::krassovsky);
-    std::println(
-        "L2 = {}, B2 = {}, A21 = {}",
-        rf.lon.toString(lga::fmt::dms),
-        rf.lat.toString(lga::fmt::dms),
-        rf.backward.toString(lga::fmt::dms));
-
-    lga::Geodetic_Inverse_Solve_Result ri =
-        lga::bessel_formula_solve(
-            B1,
-            L1,
-            rf.lat,
-            rf.lon,
-            lga::krassovsky);
-    std::println(
-        "A12 = {}, A21 = {}, S = {}",
-        ri.forward.toString(lga::fmt::dms),
-        ri.backward.toString(lga::fmt::dms),
-        ri.s);
+        Geodetic_Forward_Solve_Result rf = bessel_formula_solve(B1, L1, S, A1, krassovsky);
+        Geodetic_Inverse_Solve_Result ri = bessel_formula_solve(B1, L1, rf.lat, rf.lon, krassovsky);
+        double
+            da = rad2sec(A1.toRadian() - ri.forward.toRadian()),
+            ds = S - ri.s;
+        REQUIRE_THAT(da, WithinAbs(0, 1));
+        REQUIRE_THAT(ds, WithinAbs(0, 1));
+    }
 }

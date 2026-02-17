@@ -64,7 +64,6 @@ namespace internal
                 p_vec.end(),
                 0.0));
     }
-
 }
 
 M_libga_end

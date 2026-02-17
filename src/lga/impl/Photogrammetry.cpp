@@ -326,6 +326,7 @@ spaceResection(
             result.rmse = rmse(v, coefficient.rows(), 6);
             result.sigma = errorMatrix(result.rmse, n_inv);
             result.image = Matrix(p_img);
+            result.rotate = Matrix(rotate);
             Matrix &p = result.image;
             for (size_t pc = coefficient.rows() / 2, pi = 0uz; pi != pc; ++pi)
             {

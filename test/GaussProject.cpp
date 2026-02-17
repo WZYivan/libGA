@@ -3,50 +3,32 @@
 
 #include <lga/Geodesy>
 
-int main()
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+using namespace Catch::Matchers;
+
+TEST_CASE("gauss project")
 {
-    if (true)
+    SECTION("forward and inverse residual less than 1e-3")
+    {
+        lga::Longitude L(lga::deg2rad(115));
         for (int i = 1; i != 90; ++i)
         {
-            lga::Longitude L_from(lga::dms2rad(115, 0, 0));
-            lga::Latitude B_from(lga::dms2rad(i, 0, 0));
-
-            lga::Geodetic_Coordinate geo_coord_from{
-                .lat = B_from,
-                .lon = L_from};
-
-            lga::Gauss_Project_Coordinate gauss_proj_coord =
-                lga::gauss_project(
-                    geo_coord_from,
-                    lga::param::geodesy.gauss_project_interval.six,
-                    lga::cgcs2000);
-
-            lga::Geodetic_Coordinate geo_coord_to =
-                lga::gauss_project(
-                    gauss_proj_coord,
-                    lga::cgcs2000);
-
-            std::println(
-                "B_from = {} L_from = {}",
-                B_from.toString(lga::fmt::dms),
-                L_from.toString(lga::fmt::dms));
-            std::println(
-                "x = {} y = {} ZoneY = {}",
-                gauss_proj_coord.x,
-                gauss_proj_coord.y,
-                lga::gauss_project.zoneY(gauss_proj_coord));
-            std::println(
-                "B_to = {} L_to = {}",
-                geo_coord_to.lat.toString(lga::fmt::dms),
-                geo_coord_to.lon.toString(lga::fmt::dms));
-            std::println(
-                "B_dif = {} L_dif = {}\n",
-                lga::Angle(geo_coord_to.lat.rad() - B_from.rad()).toString(),
-                lga::Angle(geo_coord_to.lon.rad() - L_from.rad()).toString());
+            lga::Latitude B(lga::deg2rad(i));
+            lga::Geodetic_Coordinate gc(B, L);
+            lga::Gauss_Project_Coordinate gpc = lga::gauss_project(
+                gc,
+                lga::param::geodesy.gauss_project_interval.six,
+                lga::cgcs2000);
+            lga::Geodetic_Coordinate gc_inv = lga::gauss_project(
+                gpc,
+                lga::cgcs2000);
+            double
+                rb = lga::rad2sec(gc.lat.rad() - gc_inv.lat.rad()),
+                rl = lga::rad2sec(gc.lon.rad() - gc_inv.lon.rad());
+            REQUIRE_THAT(rb, WithinAbs(0, 1e-3));
+            REQUIRE_THAT(rl, WithinAbs(0, 1e-3));
         }
-
-    std::println(
-        "Bf = {:f} exptect {:f}",
-        lga::meridianArcBottom(110642.229407, lga::cgcs2000).rad(),
-        0.017464);
+    }
 }
