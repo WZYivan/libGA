@@ -216,6 +216,12 @@ namespace lga
         CONNECTING_TRA
     };
 
+    /**
+     * @brief assert if result of a single route is correct
+     *
+     * @return true if everything is ok
+     * @throw assert fail
+     */
     bool frameAssert(Route_Type, const Adjust_Frame_Result &);
 
     /**
