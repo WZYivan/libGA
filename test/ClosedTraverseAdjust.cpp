@@ -90,6 +90,8 @@ TEST_CASE("closed traverse")
                     x_beg,
                     y_beg);
 
+            REQUIRE(lga::frameAssert(lga::CLOSED_TRA, result));
+
             std::ostringstream oss{};
             result.frame.write<
                 std::ostream,
@@ -102,6 +104,6 @@ TEST_CASE("closed traverse")
             out[k] = bst_json::parse(str, {}, j_opt);
         }
 
-        std::cout << out;
+        // std::cout << out;
     }
 }

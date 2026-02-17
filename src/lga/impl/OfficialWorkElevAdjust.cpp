@@ -236,6 +236,33 @@ attachedElevAdjust(
     return result;
 }
 
-bool closedElevAssert(const Adjust_Frame_Result &p_afr) { return true; }
-bool attachedElevAssert(const Adjust_Frame_Result &p_afr) { return true; }
+bool closedElevAssert(const Adjust_Frame_Result &p_afr)
+{
+    const DataFrame
+        &data = p_afr.frame;
+    const auto &elev =
+        data.get_column<double>("elev");
+    assert(eqApprox(elev.front(), elev.back()));
+    return true;
+}
+
+bool attachedElevAssert(const Adjust_Frame_Result &p_afr)
+{
+    const DataFrame
+        &info = p_afr.info_frame,
+        &data = p_afr.frame;
+    const auto &elev =
+        data.get_column<double>("elev");
+    const auto &info_name = info.get_column<std::string>("info(name)");
+    std::size_t expected_tar_elev_idx =
+        std::distance(
+            info_name.begin(),
+            std::find(
+                info_name.begin(),
+                info_name.end(),
+                "expect target elev"));
+    const auto &info_data = info.get_column<double>("info(val)");
+    assert(eqApprox(elev.back(), info_data.at(expected_tar_elev_idx)));
+    return true;
+}
 M_libga_end

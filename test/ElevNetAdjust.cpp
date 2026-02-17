@@ -1,8 +1,8 @@
+#undef LGA_DEBUG
+
 #include <map>
 #include <vector>
 #include <string>
-
-#include <boost/property_map/property_map.hpp>
 
 #include <lga/OfficialWork>
 

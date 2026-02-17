@@ -10,7 +10,7 @@ BUILD_TYPE ?= Debug
 OPTIMIZE ?= 2
 ## how to link dependence: `Dynamic` or `Static`
 DEPS_LINK_TYPE ?= Dynamic
-CXX += $(COMPILER) -std=gnu++$(VERSION) -fPIC -Wno-interference-size -Wall
+CXX += $(COMPILER) -std=gnu++$(VERSION) -fPIC -Wno-interference-size -Wno-strict-aliasing -Wall
 
 ## where to find dependence, this is my custom setting
 THIRD_PARTY_ROOT ?= /home/azusa/file/libs/install
@@ -85,6 +85,7 @@ $(LGA_TEST_BIN_DIR)/%: $(LGA_TEST_OBJ_DIR)/%.o
 	$(CXX) $< -o $@ -lga -L$(LGA_LIB_DIR) -Wl,-rpath=$(LGA_LIB_DIR) $(LGA_LINK) $(LGA_RUNTIME)
 
 ## build all test
+#:req BUILD_TYPE 
 test-exe: $(LGA_TEST_EXE_FILES) $(LGA_TEST_OBJ_FILES)
 
 YELLOW := $(shell tput setaf 3)
@@ -97,11 +98,11 @@ NC     := $(shell tput sgr0)
 ## run all test
 run:
 	@find $(LGA_TEST_BIN_DIR) -type f -executable \
-		-exec echo -e "$(RED)> Running {}$(NC)" \; \
+		-exec echo -e "$(YELLOW)> Running {}$(NC)" \; \
 		-exec echo "" \; \
 		-exec {} \; \
 		-exec echo "" \; \
-		-exec echo -e "$(GREEN)-------------------------------------------------------------------------------$(NC)" \; \
+		-exec echo -e "$(CYAN)-------------------------------------------------------------------------------$(NC)" \; \
 		-exec echo "" \;
 
 clean-dev:

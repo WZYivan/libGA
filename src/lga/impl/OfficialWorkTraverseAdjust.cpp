@@ -572,7 +572,92 @@ connectingTraverseAdjust(
     return result;
 }
 
-bool closedTraverseAssert(const Adjust_Frame_Result &p_afr) { return true; }
-bool connectingTraverseAssert(const Adjust_Frame_Result &p_afr) { return true; }
+bool closedTraverseAssert(const Adjust_Frame_Result &p_afr)
+{
+    const DataFrame
+        &data = p_afr.frame,
+        &info = p_afr.info_frame;
+    const auto &x = data.get_column<double>("x");
+    const auto &y = data.get_column<double>("y");
+    const auto &sum_of_ang_name = info.get_column<std::string>("sum of angle(name)");
+    const auto &sum_of_ang_val = info.get_column<Angle>("sum of angle(val)");
+    const auto &aux_info_name = info.get_column<std::string>("aux info(name)");
+    const auto &aux_info_val = info.get_column<double>("aux info(val)");
+    std::size_t sum_of_corrected_angle_idx =
+        std::distance(
+            sum_of_ang_name.begin(),
+            std::find(
+                sum_of_ang_name.begin(),
+                sum_of_ang_name.end(),
+                "corrected angle"));
+    std::size_t sum_of_corrected_angle_expect_idx =
+        std::distance(
+            aux_info_name.begin(),
+            std::find(
+                aux_info_name.begin(),
+                aux_info_name.end(),
+                "f beta expect"));
+
+    assert(eqApprox(x.front(), x.back()));
+    assert(eqApprox(y.front(), y.back()));
+    assert(sum_of_ang_val
+               .at(sum_of_corrected_angle_idx)
+               .withinAbs(
+                   Angle(
+                       deg2rad(aux_info_val
+                                   .at(sum_of_corrected_angle_expect_idx)))));
+    return true;
+}
+
+bool connectingTraverseAssert(const Adjust_Frame_Result &p_afr)
+{
+    const DataFrame
+        &data = p_afr.frame,
+        &info = p_afr.info_frame;
+    const auto &x = data.get_column<double>("x");
+    const auto &y = data.get_column<double>("y");
+    const auto &sum_of_ang_name = info.get_column<std::string>("sum of angle(name)");
+    const auto &sum_of_ang_val = info.get_column<Angle>("sum of angle(val)");
+    const auto &aux_info_name = info.get_column<std::string>("aux info(name)");
+    const auto &aux_info_val = info.get_column<double>("aux info(val)");
+    std::size_t sum_of_corrected_angle_idx =
+        std::distance(
+            sum_of_ang_name.begin(),
+            std::find(
+                sum_of_ang_name.begin(),
+                sum_of_ang_name.end(),
+                "corrected angle"));
+    std::size_t sum_of_corrected_angle_expect_idx =
+        std::distance(
+            aux_info_name.begin(),
+            std::find(
+                aux_info_name.begin(),
+                aux_info_name.end(),
+                "f beta expect"));
+    std::size_t x_expect_idx =
+        std::distance(
+            aux_info_name.begin(),
+            std::find(
+                aux_info_name.begin(),
+                aux_info_name.end(),
+                "x expect"));
+    std::size_t y_expect_idx =
+        std::distance(
+            aux_info_name.begin(),
+            std::find(
+                aux_info_name.begin(),
+                aux_info_name.end(),
+                "y expect"));
+
+    assert(eqApprox(x.at(x.size() - 2), aux_info_val.at(x_expect_idx)));
+    assert(eqApprox(y.at(y.size() - 2), aux_info_val.at(y_expect_idx)));
+    assert(sum_of_ang_val
+               .at(sum_of_corrected_angle_idx)
+               .withinAbs(
+                   Angle(
+                       deg2rad(aux_info_val
+                                   .at(sum_of_corrected_angle_expect_idx)))));
+    return true;
+}
 
 M_libga_end
