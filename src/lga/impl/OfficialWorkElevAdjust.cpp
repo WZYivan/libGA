@@ -235,4 +235,7 @@ attachedElevAdjust(
 
     return result;
 }
+
+bool closedElevAssert(const Adjust_Frame_Result &p_afr) { return true; }
+bool attachedElevAssert(const Adjust_Frame_Result &p_afr) { return true; }
 M_libga_end

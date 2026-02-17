@@ -31,7 +31,7 @@ TEST_CASE("space resection")
         Space_Resection_Result result =
             spaceResection(interior, img, obj);
 
-        REQUIRE(result.info == Iterative_Algo_Info::Success);
+        REQUIRE(result.info == Iterative_Algo_Info::SUCCESS);
 
         Matrix img_inv = obj2img(obj, result.exterior, interior, result.rotate);
 

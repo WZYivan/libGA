@@ -215,6 +215,21 @@ namespace lga
         int p_distance_correction_precision = 2,
         std::function<double(double, double)> p_tolerance_fn = param::official_work.tolerance.traverse.sixty_sqrt_n);
 
+    enum Route_Type
+    {
+        CLOSED_ELEV,
+        ATTACHED_ELEV,
+        CLOSED_TRA,
+        CONNECTING_TRA
+    };
+
+    bool frameAssert(Route_Type, const Adjust_Frame_Result &);
+
+    /**
+     * @brief Extract property tag and its type, mainly through template specialization
+     *
+     * @tparam Net
+     */
     template <typename Net>
     struct Net_Property_Traits
     {
@@ -224,6 +239,11 @@ namespace lga
         static const Edge_Property_Tag_Type Edge_Property_Tag = boost::edge_bundle;
     };
 
+    /**
+     * @brief Extact descriptor and property map of vertex and edge
+     *
+     * @tparam Net
+     */
     template <typename Net>
     struct Net_Basic_Traits : public Net_Property_Traits<Net>
     {
@@ -237,13 +257,15 @@ namespace lga
         using Vertex_Property = typename Vertex_Property_Map::type::value_type;
         using Edge_Property_Map = typename boost::property_map<Net, typename NPT::Edge_Property_Tag_Type>;
         using Edge_Property = typename Edge_Property_Map::type::value_type;
-
-        using Vertex_Index_Map_Ds = std::map<Vertex_Descriptor, std::size_t>;
-        using Vertex_Index_Map = boost::associative_property_map<Vertex_Index_Map_Ds>;
-        using Edge_Index_Map_Ds = std::map<Edge_Descriptor, std::size_t>;
-        using Edge_Index_Map = boost::associative_property_map<Edge_Index_Map_Ds>;
     };
 
+    /**
+     * @brief predefined bidirectional index map of vertex and edge
+     *
+     * @tparam VD vertex descriptor
+     * @tparam ED edge descriptor
+     * @tparam IT index type
+     */
     template <typename VD, typename ED, typename IT>
     struct Net_Index_Traits
     {
@@ -258,6 +280,12 @@ namespace lga
         using Index_Edge_Map = boost::associative_property_map<Index_Edge_Map_Ds>;
     };
 
+    /**
+     * @brief defined how to display vertex and edge property
+     * @see Bfs_Display_Visitor
+     * @tparam VP
+     * @tparam EP
+     */
     template <typename VP, typename EP>
     struct Net_Property_Display_Traits
     {
@@ -271,6 +299,12 @@ namespace lga
         }
     };
 
+    /**
+     * @brief combining all traits of net together
+     *
+     * @tparam Net
+     * @tparam IT
+     */
     template <typename Net, typename IT = std::size_t>
     struct Net_Traits
         : public Net_Basic_Traits<Net>,
@@ -287,6 +321,11 @@ namespace lga
         using NPDT = Net_Property_Display_Traits<typename NBT::Vertex_Property, typename NBT::Edge_Property>;
     };
 
+    /**
+     * @brief manage bidirectional map from index to vertex/edge descriptor
+     *
+     * @tparam Net
+     */
     template <typename Net>
     class Net_Indices_Manager
     {
@@ -368,20 +407,39 @@ namespace lga
         typename NIT::Index_Edge_Map m_iem;
     };
 
+    /**
+     * @brief result of adjustment of a net
+     *
+     * @tparam Net
+     */
     template <typename Net>
     struct Adjust_Net_Result
     {
+        /**
+         * @brief adjusted net
+         *
+         */
         Net net;
+        /**
+         * @brief error matrix
+         *
+         */
         Matrix sigma;
         double rmse;
     };
 
     template <typename Net>
-    Adjust_Net_Result<Net> netAdjust(Net &p_net, double unit_w = 10.0)
+    inline Adjust_Net_Result<Net> netAdjust(Net &p_net, double unit_w = 10.0)
     {
         return {};
     }
 
+    /**
+     * @brief display all vertex/edge property in bfs order
+     *
+     * @tparam Net
+     * @tparam Stream
+     */
     template <typename Net, typename Stream>
     class Bfs_Display_Visitor : public boost::bfs_visitor<>
     {

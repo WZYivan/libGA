@@ -572,4 +572,7 @@ connectingTraverseAdjust(
     return result;
 }
 
+bool closedTraverseAssert(const Adjust_Frame_Result &p_afr) { return true; }
+bool connectingTraverseAssert(const Adjust_Frame_Result &p_afr) { return true; }
+
 M_libga_end

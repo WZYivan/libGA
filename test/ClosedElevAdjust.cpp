@@ -2,29 +2,25 @@
 #include <iostream>
 
 #include <lga/OfficialWork>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-int main()
+using namespace Catch::Matchers;
+using namespace lga;
+
+TEST_CASE("closed elev")
 {
-    std::vector<double>
-        distance = {0.8, 0.5, 1.2, 0.5, 1.0},
-        diff = {0.23, 0.26, -0.55, -0.45, 0.49};
+    SECTION("assert")
+    {
+        std::vector<double>
+            distance = {0.8, 0.5, 1.2, 0.5, 1.0},
+            diff = {0.23, 0.26, -0.55, -0.45, 0.49};
 
-    lga::Adjust_Frame_Result result = lga::closedElevAdjust(
-        distance,
-        diff,
-        12.0);
+        lga::Adjust_Frame_Result result = lga::closedElevAdjust(
+            distance,
+            diff,
+            12.0);
 
-    std::cout << "> Frame:\n";
-    result.frame.write<
-        std::ostream,
-        std::string,
-        double>(
-        std::cout, hmdf::io_format::csv2);
-
-    std::cout << "> Info frame:\n";
-    result.info_frame.write<
-        std::ostream,
-        std::string,
-        double>(
-        std::cout, hmdf::io_format::csv2);
+        REQUIRE(frameAssert(CLOSED_ELEV, result));
+    }
 }

@@ -18,5 +18,7 @@ TEST_CASE("attached elev adjust")
             diff = {2.331, 2.813, -2.224, 1.430};
 
         Adjust_Frame_Result result = attachedElevAdjust(distance, diff, 45.286, 49.579);
+
+        REQUIRE(frameAssert(ATTACHED_ELEV, result));
     }
 }

@@ -109,3 +109,8 @@ clean-dev:
 	rm -f info_frame.log.csv 
 	rm -f log.csv
 	rm -f tmp 
+
+clean:
+	rm -rf $(LGA_LIB_DIR)
+	rm -rf $(LGA_TEST_BIN_DIR)
+	rm -rf $(LGA_TEST_OBJ_DIR)

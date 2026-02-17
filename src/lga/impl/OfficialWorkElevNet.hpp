@@ -170,7 +170,7 @@ namespace lga
     };
 
     template <>
-    Adjust_Net_Result<Elev_Net> netAdjust(Elev_Net &net, double unit_w)
+    inline Adjust_Net_Result<Elev_Net> netAdjust(Elev_Net &net, double unit_w)
     {
         using N = Elev_Net;
         using NT = Net_Traits<N>;

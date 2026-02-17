@@ -276,7 +276,7 @@ spaceResection(
 
     Space_Resection_Result result{
         .exterior{Exterior::makeFrom(p_in, p_obj)},
-        .info{Iterative_Algo_Info::Not_Converged}};
+        .info{Iterative_Algo_Info::NOT_CONVERGED}};
 
     Exterior &exterior = result.exterior;
 
@@ -333,7 +333,7 @@ spaceResection(
                 p(pi, 0) = (p(pi, 0) + v(2 * pi)) * 1000;
                 p(pi, 1) = (p(pi, 1) + v(2 * pi + 1)) * 1000;
             }
-            result.info = Iterative_Algo_Info::Success;
+            result.info = Iterative_Algo_Info::SUCCESS;
             break;
         }
 
@@ -448,7 +448,7 @@ spaceIntersection(
         .coordinate = spaceIntersection(
             p_list[0].meta, p_list[0].image,
             p_list[1].meta, p_list[1].image),
-        .info = Iterative_Algo_Info::Not_Converged};
+        .info = Iterative_Algo_Info::NOT_CONVERGED};
     Matrix &coordinate = result.coordinate;
 
 #if (M_libga_debug)
@@ -543,7 +543,7 @@ spaceIntersection(
                 std::abs(correction(1, 0)) < p_threshold &&
                 std::abs(correction(2, 0)) < p_threshold)
             {
-                result.info = Iterative_Algo_Info::Success;
+                result.info = Iterative_Algo_Info::SUCCESS;
                 const Matrix N = p_inverse_solver(coeff.transpose() * coeff);
                 result.rmse = rmse(coeff * correction - residual, count * 2, 3);
                 result.sigma = errorMatrix(result.rmse, N);

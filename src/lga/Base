@@ -158,25 +158,25 @@ namespace lga
      * @brief constants to indicates status of algorithms those contains iterative process
      *
      */
-    enum class Iterative_Algo_Info
+    enum Iterative_Algo_Info
     {
         /**
          * @brief everything runs normally
          *
          */
-        Success,
+        SUCCESS,
 
         /**
          * @brief failed in running coz threshold constraints are not satisfied
          *
          */
-        Not_Converged,
+        NOT_CONVERGED,
 
         /**
          * @brief given arguments can't support algorithm to run
          *
          */
-        Pre_Unsatisfied
+        PRE_UNSATISFIED
     };
 
     /**

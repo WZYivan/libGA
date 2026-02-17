@@ -66,4 +66,33 @@ namespace internal
     }
 }
 
+#if !(M_libga_with_impl)
+extern bool closedElevAssert(const Adjust_Frame_Result &);
+extern bool attachedElevAssert(const Adjust_Frame_Result &);
+extern bool closedTraverseAssert(const Adjust_Frame_Result &);
+extern bool connectingTraverseAssert(const Adjust_Frame_Result &);
+#else
+bool closedElevAssert(const Adjust_Frame_Result &);
+bool attachedElevAssert(const Adjust_Frame_Result &);
+bool closedTraverseAssert(const Adjust_Frame_Result &);
+bool connectingTraverseAssert(const Adjust_Frame_Result &);
+#endif
+
+bool frameAssert(Route_Type p_rt, const Adjust_Frame_Result &p_afr)
+{
+    switch (p_rt)
+    {
+    case CLOSED_ELEV:
+        return closedElevAssert(p_afr);
+    case ATTACHED_ELEV:
+        return attachedElevAssert(p_afr);
+    case CLOSED_TRA:
+        return closedTraverseAssert(p_afr);
+    case CONNECTING_TRA:
+        return connectingTraverseAssert(p_afr);
+    default:
+        return false;
+    }
+}
+
 M_libga_end
